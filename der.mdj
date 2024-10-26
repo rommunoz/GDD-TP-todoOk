@@ -5065,6 +5065,87 @@
 							"headNameLabel": {
 								"$ref": "AAAAAAGSyuG6IQQ9s5k="
 							}
+						},
+						{
+							"_type": "ERDRelationshipView",
+							"_id": "AAAAAAGSyvIShARSF/M=",
+							"_parent": {
+								"$ref": "AAAAAAGR7I1Nzsn/KXM="
+							},
+							"model": {
+								"$ref": "AAAAAAGSyvISgwROyQc="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGSyvIShARTHoQ=",
+									"_parent": {
+										"$ref": "AAAAAAGSyvIShARSF/M="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 1766,
+									"top": 737,
+									"height": 13,
+									"alpha": 1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGSyvIShARSF/M="
+									},
+									"edgePosition": 1
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGSyvIShARU1k0=",
+									"_parent": {
+										"$ref": "AAAAAAGSyvIShARSF/M="
+									},
+									"font": "Arial;13;0",
+									"left": 1862,
+									"top": 752,
+									"height": 13,
+									"alpha": 0.5235987755982988,
+									"distance": 30,
+									"hostEdge": {
+										"$ref": "AAAAAAGSyvIShARSF/M="
+									},
+									"edgePosition": 2
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGSyvIShARVQYI=",
+									"_parent": {
+										"$ref": "AAAAAAGSyvIShARSF/M="
+									},
+									"font": "Arial;13;0",
+									"left": 1767,
+									"top": 784,
+									"height": 13,
+									"alpha": -0.5235987755982988,
+									"distance": 30,
+									"hostEdge": {
+										"$ref": "AAAAAAGSyvIShARSF/M="
+									}
+								}
+							],
+							"font": "Arial;13;0",
+							"head": {
+								"$ref": "AAAAAAGR7JZf48pFEDA="
+							},
+							"tail": {
+								"$ref": "AAAAAAGSytIoSwOxXAU="
+							},
+							"lineStyle": 2,
+							"points": "1888:744;1752:744;1752:816",
+							"nameLabel": {
+								"$ref": "AAAAAAGSyvIShARTHoQ="
+							},
+							"tailNameLabel": {
+								"$ref": "AAAAAAGSyvIShARU1k0="
+							},
+							"headNameLabel": {
+								"$ref": "AAAAAAGSyvIShARVQYI="
+							}
 						}
 					]
 				},
@@ -7467,6 +7548,36 @@
 						"$ref": "AAAAAAGR7I1Nzcn+HUI="
 					},
 					"name": "marca",
+					"ownedElements": [
+						{
+							"_type": "ERDRelationship",
+							"_id": "AAAAAAGSyvISgwROyQc=",
+							"_parent": {
+								"$ref": "AAAAAAGSytIoSwOv8nA="
+							},
+							"end1": {
+								"_type": "ERDRelationshipEnd",
+								"_id": "AAAAAAGSyvISgwRP9x8=",
+								"_parent": {
+									"$ref": "AAAAAAGSyvISgwROyQc="
+								},
+								"reference": {
+									"$ref": "AAAAAAGSytIoSwOv8nA="
+								}
+							},
+							"end2": {
+								"_type": "ERDRelationshipEnd",
+								"_id": "AAAAAAGSyvISgwRQtlA=",
+								"_parent": {
+									"$ref": "AAAAAAGSyvISgwROyQc="
+								},
+								"reference": {
+									"$ref": "AAAAAAGR7JZf48pDlQg="
+								},
+								"cardinality": "0..*"
+							}
+						}
+					],
 					"columns": [
 						{
 							"_type": "ERDColumn",
