@@ -1590,7 +1590,7 @@
 							"left": 200,
 							"top": 1256,
 							"width": 221.1787109375,
-							"height": 151,
+							"height": 152,
 							"nameLabel": {
 								"$ref": "AAAAAAGR7LgdGcv513w="
 							},
@@ -5971,8 +5971,8 @@
 								"$ref": "AAAAAAGR7J1Eh8rP90A="
 							},
 							"name": "localidad_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"foreignKey": true
 						},
 						{
@@ -5982,8 +5982,8 @@
 								"$ref": "AAAAAAGR7J1Eh8rP90A="
 							},
 							"name": "provincia_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"foreignKey": true
 						},
 						{
@@ -6111,8 +6111,8 @@
 								"$ref": "AAAAAAGR7Kyyv8tGyws="
 							},
 							"name": "detalle_venta_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"foreignKey": true
 						}
 					]
@@ -6131,9 +6131,9 @@
 							"_parent": {
 								"$ref": "AAAAAAGR7LdalMvTZbU="
 							},
-							"name": "codigo_envio",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"name": "envio_id",
+							"type": "INT",
+							"length": 0,
 							"primaryKey": true
 						},
 						{
@@ -6184,7 +6184,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGR7LdalMvTZbU="
 							},
-							"name": "hora_fin_inicio",
+							"name": "hora_fin",
 							"type": "DECIMAL",
 							"length": "18,0"
 						},
@@ -6215,8 +6215,8 @@
 								"$ref": "AAAAAAGR7LdalMvTZbU="
 							},
 							"name": "tipo_envio_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"foreignKey": true
 						}
 					]
@@ -6266,8 +6266,8 @@
 								"$ref": "AAAAAAGR7LgdGcv227M="
 							},
 							"name": "domicilio_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"primaryKey": true
 						},
 						{
@@ -6327,8 +6327,8 @@
 								"$ref": "AAAAAAGR7LgdGcv227M="
 							},
 							"name": "provincia_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"foreignKey": true
 						},
 						{
@@ -6338,8 +6338,8 @@
 								"$ref": "AAAAAAGR7LgdGcv227M="
 							},
 							"name": "localidad_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"foreignKey": true
 						}
 					]
@@ -7195,8 +7195,8 @@
 								"$ref": "AAAAAAGSysJBfwHsqSs="
 							},
 							"name": "tipo_envio_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"primaryKey": true
 						},
 						{
@@ -7205,7 +7205,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGSysJBfwHsqSs="
 							},
-							"name": "tipo_envio",
+							"name": "nombre",
 							"type": "NVARCHAR",
 							"length": "50"
 						}
@@ -7345,8 +7345,8 @@
 								"$ref": "AAAAAAGSysdo/QJhWxI="
 							},
 							"name": "localidad_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"primaryKey": true
 						},
 						{
@@ -7434,8 +7434,8 @@
 								"$ref": "AAAAAAGSysd9hgJukD4="
 							},
 							"name": "provincia_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"primaryKey": true
 						},
 						{
@@ -7494,8 +7494,8 @@
 								"$ref": "AAAAAAGSys2KrAM0FZw="
 							},
 							"name": "detalle_venta_id",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"type": "INT",
+							"length": 0,
 							"primaryKey": true
 						},
 						{
