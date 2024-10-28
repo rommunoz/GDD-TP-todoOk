@@ -379,31 +379,30 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE InsertIntoSubRubro
-AS
-BEGIN
-    INSERT INTO subrubro (nombre, rubro_id)
-    SELECT DISTINCT 
-        PRODUCTO_SUB_RUBRO,
-        (SELECT rubro_id FROM rubro WHERE descripcion = gd_esquema.Maestra.PRODUCTO_RUBRO_DESCRIPCION)
-    FROM gd_esquema.Maestra
-    WHERE PRODUCTO_SUB_RUBRO IS NOT NULL
-END;
-GO
+INSERT INTO #subrubro (nombre, rubro_id)
+SELECT DISTINCT 
+    PRODUCTO_SUB_RUBRO,
+    r.rubro_id
+FROM gd_esquema.Maestra m
+JOIN #rubro r ON m.PRODUCTO_RUBRO_DESCRIPCION = r.descripcion
+WHERE m.PRODUCTO_SUB_RUBRO IS NOT NULL;
 
 CREATE PROCEDURE InsertIntoProducto
 AS
 BEGIN
     INSERT INTO producto (producto_codigo, descripcion, subrubro_id, marca_id, modelo_codigo, precio)
     SELECT DISTINCT
-        PRODUCTO_CODIGO, 
-        PRODUCTO_DESCRIPCION, 
-        (SELECT subrubro_id FROM subrubro WHERE nombre = gd_esquema.Maestra.PRODUCTO_SUB_RUBRO),
-        (SELECT marca_id FROM marca WHERE marca = gd_esquema.Maestra.PRODUCTO_MARCA), 
-        PRODUCTO_MOD_CODIGO, 
-        PRODUCTO_PRECIO
-    FROM gd_esquema.Maestra
-    WHERE PRODUCTO_CODIGO IS NOT NULL
+    m.PRODUCTO_CODIGO, 
+    m.PRODUCTO_DESCRIPCION, 
+    sr.subrubro_id,
+    ma.marca_id, 
+    m.PRODUCTO_MOD_CODIGO, 
+    m.PRODUCTO_PRECIO
+FROM gd_esquema.Maestra m
+LEFT JOIN #subrubro sr ON sr.nombre = m.PRODUCTO_SUB_RUBRO
+LEFT JOIN #marca ma ON ma.marca = m.PRODUCTO_MARCA
+WHERE m.PRODUCTO_CODIGO IS NOT NULL
+ORDER BY m.PRODUCTO_CODIGO;
 END;
 GO
 
