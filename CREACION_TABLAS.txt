@@ -1,0 +1,514 @@
+/*orden principal*/
+
+CREATE TABLE localidad (
+    localidad_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    nombre NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE provincia (
+    provincia_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    nombre NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE usuario (
+    usuario_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    nombre NVARCHAR(50) UNIQUE NOT NULL,
+    pass NVARCHAR(50) NOT NULL,
+    fecha_creacion DATE DEFAULT GETDATE() NOT NULL
+);
+GO
+
+CREATE TABLE cliente (
+    cliente_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    usuario_id INT NOT NULL,
+    nombre NVARCHAR(50) NOT NULL,
+    apellido NVARCHAR(50) NOT NULL,
+    fecha_nacimiento DATE NOT NULL,
+    mail NVARCHAR(50) NOT NULL,
+    dni DECIMAL(18, 0) NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
+);
+GO
+
+CREATE TABLE vendedor (
+    vendedor_id INT IDENTITY(1,1) PRIMARY KEY,
+    usuario_id INT,
+    razon_social NVARCHAR(50) NOT NULL,
+    cuit NVARCHAR(50) NOT NULL,
+    mail NVARCHAR(50) NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
+);
+GO
+
+CREATE TABLE domicilio (
+    domicilio_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    calle NVARCHAR(50) NOT NULL,
+    nro_calle DECIMAL(18, 0) NOT NULL,
+    piso DECIMAL(18, 0) NOT NULL,
+    depto NVARCHAR(50) NOT NULL,
+    cp NVARCHAR(50) NOT NULL,
+    provincia_id INT NOT NULL,
+    localidad_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id),
+    FOREIGN KEY (localidad_id) REFERENCES localidad(localidad_id),
+    FOREIGN KEY (provincia_id) REFERENCES provincia(provincia_id)
+);
+GO
+
+CREATE TABLE almacen (
+    almacen_codigo DECIMAL(18,0) NOT NULL PRIMARY KEY,
+    nro_calle DECIMAL(18,0) NOT NULL,
+    calle NVARCHAR(50) NOT NULL,
+    localidad_id INTEGER NOT NULL,
+    provincia_id INTEGER NOT NULL,
+    costo_dia_al DECIMAL(18,2) NOT NULL,
+    FOREIGN KEY (localidad_id) REFERENCES localidad(localidad_id),
+    FOREIGN KEY (provincia_id) REFERENCES provincia(provincia_id)
+);
+
+CREATE TABLE factura (
+    factura_numero DECIMAL(18,0) PRIMARY KEY NOT NULL,
+    fecha DATE NOT NULL,
+    usuario_id INT NOT NULL,
+    total DECIMAL(18,2) NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
+);
+GO
+
+    CREATE TABLE concepto (
+	concepto_id INTEGER IDENTITY(1,1) PRIMARY KEY NOT NULL,         
+	nombre NVARCHAR(50) NOT NULL 
+    );
+GO
+
+CREATE TABLE publicacion (
+    publicacion_codigo DECIMAL(18,0) NOT NULL PRIMARY KEY,         
+    descripcion NVARCHAR(50) NOT NULL,
+    fecha_inicio DATE NOT NULL, 
+    fecha_fin DATE NOT NULL, 
+    producto_id INTEGER NOT NULL, 
+    stock DECIMAL(18,0) NOT NULL, 
+    precio DECIMAL(18,2) NOT NULL, 
+    vendedor_id INTEGER NOT NULL, 
+    almacen_codigo DECIMAL(18,0) NOT NULL,  
+    costo DECIMAL(18,2) NOT NULL, 
+    porcentaje DECIMAL(18,2) NOT NULL,
+    FOREIGN KEY (producto_id) REFERENCES producto(producto_id),
+    FOREIGN KEY (vendedor_id) REFERENCES vendedor(vendedor_id),
+    FOREIGN KEY (almacen_codigo) REFERENCES almacen(almacen_codigo)
+);
+GO
+
+CREATE TABLE detalle_factura (
+    publicacion_codigo DECIMAL(18,0) NOT NULL,	--PK,FK       
+    factura_numero DECIMAL(18,0) NOT NULL,		--PK,FK
+    concepto_id INTEGER NOT NULL,			--PK,FK
+    precio DECIMAL(18,2) NOT NULL,
+    cantidad DECIMAL(18,0) NOT NULL,
+    subtotal DECIMAL(18,2) NOT NULL,
+    PRIMARY KEY (publicacion_codigo, factura_numero, concepto_id),
+    FOREIGN KEY (publicacion_codigo) REFERENCES publicacion(publicacion_codigo),
+    FOREIGN KEY (factura_numero) REFERENCES factura(factura_numero),
+    FOREIGN KEY (concepto_id) REFERENCES concepto(concepto_id)
+);
+GO
+
+CREATE TABLE detalle_venta (
+    detalle_venta_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    publicacion_codigo DECIMAL(18, 0) NOT NULL,
+    precio DECIMAL(18, 2) NOT NULL,
+    cantidad_vendida DECIMAL(18, 0) NOT NULL,
+    sub_total DECIMAL(18, 2) NOT NULL,
+    FOREIGN KEY (publicacion_codigo) REFERENCES publicacion(publicacion_codigo)
+);
+GO
+
+CREATE TABLE venta (
+    codigo_venta DECIMAL(18, 0) PRIMARY KEY,
+    usuario_id DECIMAL(18, 2) NOT NULL,
+    fecha_hora DATETIME NOT NULL,
+    total DECIMAL(18, 2) NOT NULL,
+    detalle_venta_id INT,
+    FOREIGN KEY (detalle_venta_id) REFERENCES detalle_venta(detalle_venta_id)
+);
+GO
+
+CREATE TABLE marca(
+	marca_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	marca NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE modelo(
+	modelo_codigo DECIMAL(18,0) PRIMARY KEY NOT NULL,
+	descripcion NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE rubro(
+	rubro_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	descripcion NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE subrubro(
+	subrubro_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	nombre NVARCHAR(50) NOT NULL,
+	rubro_id INT NOT NULL,
+	FOREIGN KEY (rubro_id) REFERENCES rubro(rubro_id) 
+);
+GO
+
+CREATE TABLE producto (
+	producto_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	producto_codigo NVARCHAR(50) NOT NULL,
+	descripcion NVARCHAR(50) NOT NULL,
+	subrubro_id DECIMAL(18,0) NOT NULL,
+	marca_id INT NOT NULL,
+	modelo_codigo DECIMAL(18,0) NOT NULL,
+	precio DECIMAL(18,2) NOT NULL,
+	FOREIGN KEY (marca_id) REFERENCES marca(marca_id),
+	FOREIGN KEY (modelo_codigo) REFERENCES modelo(modelo_codigo)
+);
+GO
+
+CREATE TABLE medio_pago(
+	medio_pago_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	medio_pago NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE tipo_medio_pago(
+	tipo_medio_pago_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	tipo_medio_pago NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE detalle_pago(
+	detalle_pago_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	nro_tarjeta NVARCHAR(50) NOT NULL,
+	fecha_venc_tarjeta DATE NOT NULL,
+	cant_cuotas DECIMAL(18,2) NOT NULL
+);
+
+CREATE TABLE pago(
+	pago_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	codigo_venta DECIMAL(18,0) NOT NULL,
+	detalle_pago_id INT,
+	importe DECIMAL(18,2) NOT NULL,
+	medio_pago_id INT NOT NULL,
+	tipo_medio_pago_id INT NOT NULL,
+	fecha DECIMAL(18,2) NOT NULL,
+	FOREIGN KEY (codigo_venta) REFERENCES venta(codigo_venta),
+	FOREIGN KEY (detalle_pago_id) REFERENCES detalle_pago(detalle_pago_id),
+	FOREIGN KEY (medio_pago_id) REFERENCES medio_pago(medio_pago_id),
+	FOREIGN KEY (tipo_medio_pago_id) REFERENCES tipo_medio_pago(tipo_medio_pago_id)
+);
+GO
+
+CREATE TABLE tipo_envio (
+    tipo_envio_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    nombre NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE envio (
+    envio_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    codigo_venta DECIMAL(18, 0) NOT NULL,
+    domicilio_id INT NOT NULL,
+    fecha_programada DATE,
+    hora_inicio DECIMAL(18, 0) NOT NULL,
+    hora_fin DECIMAL(18, 0) NOT NULL,
+    costo DECIMAL(18, 2) NOT NULL,
+    fecha_entrega DATE NOT NULL,
+    tipo_envio_id INT NOT NULL,
+    FOREIGN KEY (codigo_venta) REFERENCES venta(codigo_venta),
+    FOREIGN KEY (domicilio_id) REFERENCES domicilio(domicilio_id),
+    FOREIGN KEY (tipo_envio_id) REFERENCES tipo_envio(tipo_envio_id)
+);
+GO
+
+/* PROCEDURES*/
+
+
+CREATE PROCEDURE InsertIntoLocalidad
+AS
+BEGIN
+    INSERT INTO localidad (nombre)
+    SELECT DISTINCT nombre
+    FROM (
+        SELECT VEN_USUARIO_DOMICILIO_LOCALIDAD AS nombre
+        FROM gd_esquema.Maestra
+        WHERE VEN_USUARIO_DOMICILIO_LOCALIDAD IS NOT NULL
+
+        UNION ALL
+
+        SELECT CLI_USUARIO_DOMICILIO_LOCALIDAD AS nombre
+        FROM gd_esquema.Maestra
+        WHERE CLI_USUARIO_DOMICILIO_LOCALIDAD IS NOT NULL
+
+        UNION ALL
+
+        SELECT ALMACEN_Localidad AS nombre
+        FROM gd_esquema.Maestra
+        WHERE ALMACEN_Localidad IS NOT NULL
+    ) localidades;
+END;
+GO
+
+CREATE PROCEDURE InsertIntoProvincia
+AS
+BEGIN
+    INSERT INTO provincia (nombre)
+    SELECT DISTINCT nombre
+    FROM (
+        SELECT VEN_USUARIO_DOMICILIO_PROVINCIA AS nombre
+        FROM gd_esquema.Maestra
+        WHERE VEN_USUARIO_DOMICILIO_PROVINCIA IS NOT NULL
+
+        UNION ALL
+
+        SELECT CLI_USUARIO_DOMICILIO_PROVINCIA AS nombre
+        FROM gd_esquema.Maestra
+        WHERE CLI_USUARIO_DOMICILIO_PROVINCIA IS NOT NULL
+
+        UNION ALL
+
+        SELECT ALMACEN_PROVINCIA AS nombre
+        FROM gd_esquema.Maestra
+        WHERE ALMACEN_PROVINCIA IS NOT NULL
+    ) provincias;
+END;
+GO
+
+/*usuario*/
+
+/*cliente y vendedor*/
+
+CREATE PROCEDURE InsertIntoDomicilioCli
+AS
+BEGIN
+    INSERT INTO domicilio (calle, nro_calle, piso, depto, cp, usuario_id, provincia_id, localidad_id)
+    SELECT DISTINCT 
+        CLI_USUARIO_DOMICILIO_CALLE,
+        CLI_USUARIO_DOMICILIO_NRO_CALLE,
+        CLI_USUARIO_DOMICILIO_PISO,
+        CLI_USUARIO_DOMICILIO_DEPTO,
+        CLI_USUARIO_DOMICILIO_CP,
+	u.usuario_id,
+        l.localidad_id,
+        p.provincia_id
+    FROM 
+        gd_esquema.Maestra m 
+    INNER JOIN usuario u ON 
+        m.CLI_USUARIO_NOMBRE = u.nombre AND
+	m.CLI_USUARIO_PASS = u.pass AND
+	m.CLI_USUARIO_FECHA_CREACION = u.fecha_creacion
+    INNER JOIN localidad l ON 
+        m.CLI_USUARIO_DOMICILIO_LOCALIDAD = l.nombre
+    INNER JOIN provincia p ON 
+        m.CLI_USUARIO_DOMICILIO_PROVINCIA = p.nombre
+    WHERE CLI_USUARIO_DOMICILIO_CALLE IS NOT NULL;
+END;
+GO
+
+CREATE PROCEDURE InsertIntoDomicilioVen
+AS
+BEGIN
+    INSERT INTO domicilio (calle, nro_calle, piso, depto, cp, provincia_id, localidad_id)
+    SELECT DISTINCT 
+		VEN_USUARIO_DOMICILIO_CALLE,
+		VEN_USUARIO_DOMICILIO_NRO_CALLE,
+		VEN_USUARIO_DOMICILIO_PISO,
+		VEN_USUARIO_DOMICILIO_DEPTO,
+		VEN_USUARIO_DOMICILIO_CP,
+        l.localidad_id,
+        p.provincia_id
+    FROM 
+        gd_esquema.Maestra m 
+    INNER JOIN localidad l ON 
+        m.VEN_USUARIO_DOMICILIO_LOCALIDAD = l.nombre
+    INNER JOIN provincia p ON 
+        m.VEN_USUARIO_DOMICILIO_PROVINCIA = p.nombre
+    WHERE VEN_USUARIO_DOMICILIO_CALLE IS NOT NULL;
+END;
+GO
+
+/*factura*/
+
+/*concepto*/
+
+/*publicacion*/
+
+/* detalle_factura */
+
+CREATE PROCEDURE InsertIntoDetalleVenta
+AS
+BEGIN
+    INSERT INTO detalle_venta (publicacion_codigo, precio, cantidad_vendida, sub_total)
+    SELECT DISTINCT PUBLICACION_CODIGO, VENTA_DET_PRECIO, VENTA_DET_CANT, VENTA_DET_SUB_TOTAL
+    FROM gd_esquema.Maestra
+    WHERE VENTA_CODIGO IS NOT NULL;
+END;
+GO
+
+CREATE PROCEDURE InsertIntoMarca
+AS
+BEGIN
+	INSERT INTO marca (marca)
+	SELECT DISTINCT PRODUCTO_MARCA
+	FROM gd_esquema.Maestra
+END;
+GO
+
+CREATE PROCEDURE InsertIntoModelo
+AS
+BEGIN
+	INSERT INTO modelo(modelo_codigo, descripcion)
+	SELECT DISTINCT PRODUCTO_MOD_CODIGO, PRODUCTO_MOD_DESCRIPCION
+	FROM gd_esquema.Maestra
+END;
+GO
+
+CREATE PROCEDURE InsertIntoRubro
+AS
+BEGIN
+    INSERT INTO rubro (descripcion)
+    SELECT DISTINCT PRODUCTO_RUBRO_DESCRIPCION
+    FROM gd_esquema.Maestra
+END;
+GO
+
+CREATE PROCEDURE InsertIntoSubRubro
+AS
+BEGIN
+    INSERT INTO subrubro (nombre, rubro_id)
+    SELECT DISTINCT 
+        PRODUCTO_SUB_RUBRO,
+        (SELECT rubro_id FROM rubro WHERE descripcion = gd_esquema.Maestra.PRODUCTO_RUBRO_DESCRIPCION)
+    FROM gd_esquema.Maestra
+END;
+GO
+
+CREATE PROCEDURE InsertIntoProducto
+AS
+BEGIN
+    INSERT INTO producto (producto_codigo, descripcion, subrubro_id, marca_id, modelo_codigo, precio)
+    SELECT DISTINCT
+        PRODUCTO_CODIGO, 
+        PRODUCTO_DESCRIPCION, 
+        (SELECT subrubro_id FROM subrubro WHERE nombre = gd_esquema.Maestra.PRODUCTO_SUB_RUBRO),
+        (SELECT marca_id FROM marca WHERE marca = gd_esquema.Maestra.PRODUCTO_MARCA), 
+        PRODUCTO_MOD_CODIGO, 
+        PRODUCTO_PRECIO
+    FROM gd_esquema.Maestra
+END;
+GO
+
+CREATE PROCEDURE InsertIntoMedioPago
+AS
+BEGIN
+    INSERT INTO medio_pago (medio_pago)
+    SELECT DISTINCT PAGO_MEDIO_PAGO
+    FROM gd_esquema.Maestra
+END;
+GO
+
+CREATE PROCEDURE InsertIntoTipoMedioPago
+AS
+BEGIN
+    INSERT INTO tipo_medio_pago (tipo_medio_pago)
+    SELECT DISTINCT PAGO_TIPO_MEDIO_PAGO
+    FROM gd_esquema.Maestra
+END;
+GO
+
+CREATE PROCEDURE InsertIntoDetallePago
+AS
+BEGIN
+    INSERT INTO detalle_pago (nro_tarjeta, fecha_venc_tarjeta, cant_cuotas)
+    SELECT DISTINCT 
+        PAGO_NRO_TARJETA, 
+        PAGO_FECHA_VENC_TARJETA, 
+        PAGO_CANT_CUOTAS
+    FROM gd_esquema.Maestra
+END;
+GO
+
+CREATE PROCEDURE InsertIntoPago
+AS
+BEGIN
+    INSERT INTO pago (codigo_venta, detalle_pago_id, importe, medio_pago_id, tipo_medio_pago_id, fecha)
+    SELECT DISTINCT 
+        VENTA_CODIGOw, /*no se si esta bien*/
+        (SELECT detalle_pago_id FROM detalle_pago WHERE nro_tarjeta = gd_esquema.Maestra.PAGO_NRO_TARJETA AND fecha_venc_tarjeta = gd_esquema.Maestra.PAGO_FECHA_VENC_TARJETA),
+        PAGO_IMPORTE, 
+        (SELECT medio_pago_id FROM medio_pago WHERE medio_pago = gd_esquema.Maestra.PAGO_MEDIO_PAGO), 
+        (SELECT tipo_medio_pago_id FROM tipo_medio_pago WHERE tipo_medio_pago = gd_esquema.Maestra.PAGO_TIPO_MEDIO_PAGO), 
+        PAGO_FECHA
+    FROM gd_esquema.Maestra;
+END;
+GO
+
+CREATE PROCEDURE InsertIntoTipoEnvio
+AS
+BEGIN
+    INSERT INTO tipo_envio(nombre)
+    SELECT DISTINCT ENVIO_TIPO
+    FROM gd_esquema.Maestra
+    WHERE ENVIO_TIPO IS NOT NULL;
+END;
+GO
+
+CREATE PROCEDURE InsertIntoEnvio
+AS
+BEGIN
+    INSERT INTO envio(codigo_venta, domicilio_id, fecha_programada, hora_inicio, hora_fin, costo, fecha_entrega, tipo_envio_id)
+    SELECT DISTINCT 
+        v.codigo_venta,
+        u.domicilio_id,
+        ENVIO_FECHA_PROGAMADA,
+        ENVIO_HORA_INICIO,
+        ENVIO_HORA_FIN_INICIO,
+        ENVIO_COSTO,
+        ENVIO_FECHA_ENTREGA,
+        te.tipo_envio_id
+    FROM 
+        gd_esquema.Maestra m 
+    INNER JOIN venta v ON 
+        m.VENTA_CODIGO = v.codigo_venta
+    INNER JOIN tipo_envio te ON 
+        m.ENVIO_TIPO = te.nombre
+    INNER JOIN usuario u ON 
+        v.usuario_id = u.usuario_id
+    WHERE ENVIO_HORA_INICIO IS NOT NULL;
+END;
+GO
+
+
+/* EXEC */
+
+EXEC InsertIntoLocalidad;
+EXEC InsertIntoProvincia;
+EXEC InsertIntoDomicilioCli;
+EXEC InsertIntoDomicilioVen;
+/*usuario*/
+/*cliente y vendedor*/
+/*factura*/
+/*concepto*/
+/*publicacion*/
+/* detalle_factura */
+EXEC InsertIntoMarca;
+EXEC InsertIntoModelo;
+EXEC InsertIntoRubro;
+EXEC InsertIntoSubrubro;
+EXEC InsertIntoProducto;
+EXEC InsertIntoMedioPago;
+EXEC InsertIntoTipoMedioPago;
+EXEC InsertIntoDetallePago;
+EXEC InsertIntoPago;
+EXEC InsertIntoTipoEnvio;
+EXEC InsertIntoEnvio;
