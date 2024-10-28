@@ -402,7 +402,6 @@ FROM gd_esquema.Maestra m
 LEFT JOIN #subrubro sr ON sr.nombre = m.PRODUCTO_SUB_RUBRO
 LEFT JOIN #marca ma ON ma.marca = m.PRODUCTO_MARCA
 WHERE m.PRODUCTO_CODIGO IS NOT NULL
-ORDER BY m.PRODUCTO_CODIGO;
 END;
 GO
 
@@ -417,11 +416,11 @@ BEGIN
         ALMACEN_COSTO_DIA_AL,
         l.localidad_id,
         p.provincia_id
-    FROM [GD2C2024].[gd_esquema].[Maestra] m 
+    FROM gd_esquema.Maestra m 
     INNER JOIN localidad l ON 
         m.ALMACEN_LOCALIDAD = l.nombre
     INNER JOIN provincia p ON 
-        m.ALMACEN_PROVINCIA = p.nombre;
+        m.ALMACEN_PROVINCIA = p.nombre
 END;
 GO
 
@@ -437,8 +436,9 @@ CREATE PROCEDURE InsertIntoDetalleVenta
 AS
 BEGIN
     INSERT INTO detalle_venta (publicacion_codigo, precio, cantidad_vendida, sub_total)
-    SELECT DISTINCT PUBLICACION_CODIGO, VENTA_DET_PRECIO, VENTA_DET_CANT, VENTA_DET_SUB_TOTAL
-    FROM gd_esquema.Maestra
+    SELECT DISTINCT p.publicacion_codigo, VENTA_DET_PRECIO, VENTA_DET_CANT, VENTA_DET_SUB_TOTAL
+    FROM gd_esquema.Maestra m JOIN publicacion p
+	ON m.PUBLICACION_CODIGO = p.publicacion_codigo
     WHERE VENTA_CODIGO IS NOT NULL
 END;
 GO
@@ -466,6 +466,7 @@ BEGIN
     INSERT INTO medio_pago (medio_pago)
     SELECT DISTINCT PAGO_MEDIO_PAGO
     FROM gd_esquema.Maestra
+    WHERE PAGO_MEDIO_PAGO IS NOT NULL
 END;
 GO
 
@@ -475,6 +476,7 @@ BEGIN
     INSERT INTO tipo_medio_pago (tipo_medio_pago)
     SELECT DISTINCT PAGO_TIPO_MEDIO_PAGO
     FROM gd_esquema.Maestra
+    WHERE PAGO_TIPO_MEDIO_PAGO IS NOT NULL
 END;
 GO
 
@@ -487,6 +489,7 @@ BEGIN
         PAGO_FECHA_VENC_TARJETA, 
         PAGO_CANT_CUOTAS
     FROM gd_esquema.Maestra
+    WHERE PAGO_NRO_TARJETA IS NOT NULL
 END;
 GO
 
@@ -495,13 +498,15 @@ AS
 BEGIN
     INSERT INTO pago (codigo_venta, detalle_pago_id, importe, medio_pago_id, tipo_medio_pago_id, fecha)
     SELECT DISTINCT 
-        VENTA_CODIGOw, /*no se si esta bien*/
+        v.codigo_venta
         (SELECT detalle_pago_id FROM detalle_pago WHERE nro_tarjeta = gd_esquema.Maestra.PAGO_NRO_TARJETA AND fecha_venc_tarjeta = gd_esquema.Maestra.PAGO_FECHA_VENC_TARJETA),
         PAGO_IMPORTE, 
         (SELECT medio_pago_id FROM medio_pago WHERE medio_pago = gd_esquema.Maestra.PAGO_MEDIO_PAGO), 
         (SELECT tipo_medio_pago_id FROM tipo_medio_pago WHERE tipo_medio_pago = gd_esquema.Maestra.PAGO_TIPO_MEDIO_PAGO), 
         PAGO_FECHA
-    FROM gd_esquema.Maestra;
+    FROM gd_esquema.Maestra m JOIN venta v
+	ON m.VENTA_CODIGO = v.codigo_venta
+    WHERE PAGO_IMPORTE IS NOT NULL
 END;
 GO
 
