@@ -298,7 +298,7 @@ BEGIN
 	WHERE CLIENTE_DNI IS NOT NULL
 	GROUP BY CLIENTE_NOMBRE, CLIENTE_APELLIDO, CLIENTE_DNI,
 		CLI_USUARIO_NOMBRE, CLI_USUARIO_PASS, CLI_USUARIO_FECHA_CREACION 
-	UNION
+	
 	INSERT INTO usuario (nombre, pass, fecha_creacion)
 	SELECT
 		VEN_USUARIO_NOMBRE,
@@ -480,50 +480,12 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE InsertIntoFactura
-AS
-BEGIN
-    INSERT INTO factura (factura_numero, fecha, usuario_id, total)  
-	SELECT DISTINCT 
-		FACTURA_NUMERO,
-		FACTURA_FECHA,
-		u.usuario_id,
-		FACTURA_TOTAL
-    FROM 
-        gd_esquema.Maestra m 
-	INNER JOIN usuario u ON ( 
-		m.VEN_USUARIO_NOMBRE = u.nombre 
-		AND m.VEN_USUARIO_PASS = u.pass 
-		AND m.VEN_USUARIO_FECHA_CREACION = u.fecha_creacion
-		) 
-		OR 
-		( 
-		m.CLI_USUARIO_NOMBRE = u.nombre 
-		AND m.CLI_USUARIO_PASS = u.pass 
-		AND m.CLI_USUARIO_FECHA_CREACION = u.fecha_creacion
-		)
-    WHERE FACTURA_NUMERO IS NOT NULL;
-END;
-GO
-
-CREATE PROCEDURE InsertIntoConcepto
-AS
-BEGIN
-	INSERT INTO concepto (nombre)
-	SELECT DISTINCT
-		FACTURA_DET_TIPO
-	FROM 
-        gd_esquema.Maestra m
-	WHERE FACTURA_DET_TIPO IS NOT NULL
-END;
-GO
-
 CREATE PROCEDURE InsertIntoPublicacion
 AS
 BEGIN
 	INSERT INTO publicacion (publicacion_codigo, descripcion, fecha_inicio, fecha_fin,
-		producto_id, stock, precio, vendedor_id, almacen_codigo,
-		costo, porcentaje)
+		producto_id, stock, vendedor_id, almacen_codigo,
+		costo, precio, porcentaje)
 	SELECT DISTINCT
 		PUBLICACION_CODIGO,
 		PUBLICACION_DESCRIPCION,
@@ -550,14 +512,45 @@ BEGIN
 END;
 GO
 
+CREATE PROCEDURE InsertIntoFactura
+AS
+BEGIN
+    INSERT INTO factura (factura_numero, fecha, usuario_id, total)  
+	SELECT DISTINCT 
+		FACTURA_NUMERO,
+		FACTURA_FECHA,
+		v.usuario_id,
+		FACTURA_TOTAL
+    FROM 
+        [GD2C2024].[gd_esquema].[Maestra] m 
+	INNER JOIN publicacion p
+		ON m.PUBLICACION_CODIGO = p.publicacion_codigo
+	INNER JOIN vendedor v 
+		ON p.vendedor_id = v.vendedor_id
+    WHERE m.FACTURA_NUMERO IS NOT NULL;
+END;
+GO
+
+CREATE PROCEDURE InsertIntoConcepto
+AS
+BEGIN
+	INSERT INTO concepto (nombre)
+	SELECT DISTINCT
+		FACTURA_DET_TIPO
+	FROM 
+        gd_esquema.Maestra m
+	WHERE FACTURA_DET_TIPO IS NOT NULL
+END;
+GO
+
 CREATE PROCEDURE InsertIntoDetalleFactura
 AS
 BEGIN
 	INSERT INTO detalle_factura (publicacion_codigo, factura_numero, 
 		concepto_id, precio, cantidad, subtotal)
 	SELECT DISTINCT
-		p.publicacion_codigo,
-		f.factura_numero,
+		m.PUBLICACION_CODIGO,
+		m.FACTURA_NUMERO,
 		c.concepto_id,
 		FACTURA_DET_PRECIO,
 		FACTURA_DET_CANTIDAD,
@@ -570,7 +563,8 @@ BEGIN
 		ON m.FACTURA_NUMERO = f.factura_numero
 	INNER JOIN concepto c
 		ON m.FACTURA_DET_TIPO = c.nombre
-	WHERE m.FACTURA_NUMERO IS NOT NULL
+	WHERE 
+		m.FACTURA_NUMERO IS NOT NULL
 		AND m.PUBLICACION_CODIGO IS NOT NULL
 		AND m.FACTURA_DET_TIPO IS NOT NULL;
 END;
