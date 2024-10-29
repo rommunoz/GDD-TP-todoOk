@@ -1,21 +1,21 @@
 /*orden principal*/
 
 CREATE TABLE localidad (
-    localidad_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-    nombre NVARCHAR(50) NOT NULL
+     localidad_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    nombre NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL
 );
 GO
 
 CREATE TABLE provincia (
     provincia_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-    nombre NVARCHAR(50) NOT NULL
+    nombre NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL
 );
 GO
 
 CREATE TABLE usuario (
     usuario_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
-    nombre NVARCHAR(50) NOT NULL,
-    pass NVARCHAR(50) NOT NULL,
+    nombre NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
+    pass NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
     fecha_creacion DATE NOT NULL
 );
 GO
@@ -35,15 +35,15 @@ GO
 CREATE TABLE vendedor (
     vendedor_id INT IDENTITY(1,1) PRIMARY KEY,
     usuario_id INT,
-    razon_social NVARCHAR(50) NOT NULL,
-    cuit NVARCHAR(50) NOT NULL,
-    mail NVARCHAR(50) NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
+    razon_social NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
+    cuit NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
+    mail NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES #usuario(usuario_id)
 );
 GO
 
 CREATE TABLE domicilio (
-    domicilio_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+     domicilio_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
     calle NVARCHAR(50) NOT NULL,
     nro_calle DECIMAL(18, 0) NOT NULL,
     piso DECIMAL(18, 0) NOT NULL,
@@ -52,48 +52,48 @@ CREATE TABLE domicilio (
     provincia_id INT NOT NULL,
     localidad_id INT NOT NULL,
     usuario_id INT NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id),
-    FOREIGN KEY (localidad_id) REFERENCES localidad(localidad_id),
-    FOREIGN KEY (provincia_id) REFERENCES provincia(provincia_id)
+    FOREIGN KEY (usuario_id) REFERENCES #usuario(usuario_id),
+    FOREIGN KEY (localidad_id) REFERENCES #localidad(localidad_id),
+    FOREIGN KEY (provincia_id) REFERENCES #provincia(provincia_id)
 );
 GO
 
 CREATE TABLE marca(
 	marca_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
-	marca NVARCHAR(50) NOT NULL
+	marca NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL
 );
 GO
 
 CREATE TABLE modelo(
 	modelo_codigo DECIMAL(18,0) PRIMARY KEY NOT NULL,
-	descripcion NVARCHAR(50) NOT NULL
+	descripcion NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL
 );
 GO
 
 CREATE TABLE rubro(
 	rubro_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
-	descripcion NVARCHAR(50) NOT NULL
+	descripcion NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL
 );
 GO
 
 CREATE TABLE subrubro(
 	subrubro_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
-	nombre NVARCHAR(50) NOT NULL,
+	nombre NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
 	rubro_id INT NOT NULL,
-	FOREIGN KEY (rubro_id) REFERENCES rubro(rubro_id) 
+	FOREIGN KEY (rubro_id) REFERENCES #rubro(rubro_id) 
 );
 GO
 
 CREATE TABLE producto (
 	producto_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
-	producto_codigo NVARCHAR(50) NOT NULL,
+	producto_codigo NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
 	descripcion NVARCHAR(50) NOT NULL,
 	subrubro_id DECIMAL(18,0) NOT NULL,
 	marca_id INT NOT NULL,
 	modelo_codigo DECIMAL(18,0) NOT NULL,
 	precio DECIMAL(18,2) NOT NULL,
-	FOREIGN KEY (marca_id) REFERENCES marca(marca_id),
-	FOREIGN KEY (modelo_codigo) REFERENCES modelo(modelo_codigo)
+	FOREIGN KEY (marca_id) REFERENCES #marca(marca_id),
+	FOREIGN KEY (modelo_codigo) REFERENCES #modelo(modelo_codigo)
 );
 GO
 
@@ -104,8 +104,8 @@ CREATE TABLE almacen (
     localidad_id INTEGER NOT NULL,
     provincia_id INTEGER NOT NULL,
     costo_dia_al DECIMAL(18,2) NOT NULL,
-    FOREIGN KEY (localidad_id) REFERENCES localidad(localidad_id),
-    FOREIGN KEY (provincia_id) REFERENCES provincia(provincia_id)
+    FOREIGN KEY (localidad_id) REFERENCES #localidad(localidad_id),
+    FOREIGN KEY (provincia_id) REFERENCES #provincia(provincia_id)
 );
 
 CREATE TABLE factura (
@@ -113,7 +113,7 @@ CREATE TABLE factura (
     fecha DATE NOT NULL,
     usuario_id INT NOT NULL,
     total DECIMAL(18,2) NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
+    FOREIGN KEY (usuario_id) REFERENCES #usuario(usuario_id)
 );
 GO
 
@@ -142,9 +142,9 @@ CREATE TABLE publicacion (
 GO
 
 CREATE TABLE detalle_factura (
-    publicacion_codigo DECIMAL(18,0) NOT NULL,	--PK,FK       
-    factura_numero DECIMAL(18,0) NOT NULL,		--PK,FK
-    concepto_id INTEGER NOT NULL,			--PK,FK
+    publicacion_codigo DECIMAL(18,0) NOT NULL,	       
+    factura_numero DECIMAL(18,0) NOT NULL,		
+    concepto_id INTEGER NOT NULL,			
     precio DECIMAL(18,2) NOT NULL,
     cantidad DECIMAL(18,0) NOT NULL,
     subtotal DECIMAL(18,2) NOT NULL,
@@ -296,7 +296,7 @@ BEGIN
 	WHERE CLIENTE_DNI IS NOT NULL
 	GROUP BY CLIENTE_NOMBRE, CLIENTE_APELLIDO, CLIENTE_DNI,
 		CLI_USUARIO_NOMBRE, CLI_USUARIO_PASS, CLI_USUARIO_FECHA_CREACION 
-	
+	UNION
 	INSERT INTO usuario (nombre, pass, fecha_creacion)
 	SELECT
 		VEN_USUARIO_NOMBRE,
@@ -321,7 +321,7 @@ BEGIN
 		CLIENTE_MAIL,
 		CLIENTE_DNI
 	FROM 
-		[GD2C2024].[gd_esquema].[Maestra] m 
+		gd_esquema.Maestra m 
 	INNER JOIN usuario u ON m.CLI_USUARIO_NOMBRE = u.nombre 
 		AND m.CLI_USUARIO_PASS = u.pass 
 		AND m.CLI_USUARIO_FECHA_CREACION = u.fecha_creacion
@@ -339,7 +339,7 @@ BEGIN
 		VENDEDOR_CUIT,
 		VENDEDOR_MAIL
 	FROM 
-		[GD2C2024].[gd_esquema].[Maestra] m 
+		gd_esquema.Maestra m 
 	INNER JOIN usuario u ON m.VEN_USUARIO_NOMBRE = u.nombre 
 		AND m.VEN_USUARIO_PASS = u.pass 
 		AND m.VEN_USUARIO_FECHA_CREACION = u.fecha_creacion
@@ -382,7 +382,7 @@ BEGIN
             m.CLI_USUARIO_DOMICILIO_PROVINCIA = p.nombre
         WHERE CLI_USUARIO_DOMICILIO_CALLE IS NOT NULL
 
-        UNION
+        UNION ALL
 
         SELECT 
             VEN_USUARIO_DOMICILIO_CALLE calle,
@@ -396,9 +396,9 @@ BEGIN
         FROM 
             gd_esquema.Maestra m 
 	INNER JOIN usuario u ON 
-            m.CLI_USUARIO_NOMBRE = u.nombre AND
-            m.CLI_USUARIO_PASS = u.pass AND
-            m.CLI_USUARIO_FECHA_CREACION = u.fecha_creacion
+            m.VEN_USUARIO_NOMBRE = u.nombre AND
+            m.VEN_USUARIO_PASS = u.pass AND
+            m.VEN_USUARIO_FECHA_CREACION = u.fecha_creacion
         INNER JOIN localidad l ON 
             m.VEN_USUARIO_DOMICILIO_LOCALIDAD = l.nombre
         INNER JOIN provincia p ON 
@@ -498,7 +498,7 @@ BEGIN
 		u.usuario_id,
 		FACTURA_TOTAL
     FROM 
-        [GD2C2024].[gd_esquema].[Maestra] m 
+        gd_esquema.Maestra m 
 	INNER JOIN usuario u ON ( 
 		m.VEN_USUARIO_NOMBRE = u.nombre 
 		AND m.VEN_USUARIO_PASS = u.pass 
@@ -521,7 +521,7 @@ BEGIN
 	SELECT DISTINCT
 		FACTURA_DET_TIPO
 	FROM 
-        [GD2C2024].[gd_esquema].[Maestra] m
+        gd_esquema.Maestra m
 	WHERE FACTURA_DET_TIPO IS NOT NULL
 END;
 GO
@@ -545,7 +545,7 @@ BEGIN
 		PUBLICACION_PRECIO,
 		PUBLICACION_PORC_VENTA
 	FROM 
-        [GD2C2024].[gd_esquema].[Maestra] m
+        gd_esquema.Maestra m
 	INNER JOIN producto prod ON
 		m.PRODUCTO_CODIGO = prod.producto_codigo
 	INNER JOIN vendedor v ON 
@@ -571,7 +571,7 @@ BEGIN
 		FACTURA_DET_CANTIDAD,
 		FACTURA_DET_SUBTOTAL
 	FROM 
-		[GD2C2024].[gd_esquema].[Maestra] m
+		gd_esquema.Maestra m
 	INNER JOIN publicacion p 
 		ON m.PUBLICACION_CODIGO = p.publicacion_codigo
 	INNER JOIN factura f 
@@ -601,7 +601,7 @@ BEGIN
     INSERT INTO venta (codigo_venta, usuario_id, fecha, total, detalle_venta_id)
     SELECT VENTA_CODIGO, USUARIO_ID, VENTA_FECHA, VENTA_TOTAL, dv.detalle_venta_id
     FROM 
-        [GD2C2024].[gd_esquema].[Maestra] m 
+        gd_esquema.Maestra m 
     INNER JOIN detalle_venta dv ON 
         m.PUBLICACION_CODIGO = dv.publicacion_codigo 
         AND m.VENTA_DET_PRECIO = dv.precio 
