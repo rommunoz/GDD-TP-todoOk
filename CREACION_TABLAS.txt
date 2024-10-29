@@ -438,13 +438,18 @@ BEGIN
 END;
 GO
 
-INSERT INTO #subrubro (nombre, rubro_id)
-SELECT DISTINCT 
-    PRODUCTO_SUB_RUBRO,
-    r.rubro_id
-FROM gd_esquema.Maestra m
-JOIN #rubro r ON m.PRODUCTO_RUBRO_DESCRIPCION = r.descripcion
-WHERE m.PRODUCTO_SUB_RUBRO IS NOT NULL;
+CREATE PROCEDURE InsertIntoSubRubro
+AS
+BEGIN
+	INSERT INTO subrubro (nombre, rubro_id)
+	SELECT DISTINCT 
+		PRODUCTO_SUB_RUBRO,
+		r.rubro_id
+	FROM gd_esquema.Maestra m
+	JOIN rubro r ON m.PRODUCTO_RUBRO_DESCRIPCION = r.descripcion
+	WHERE m.PRODUCTO_SUB_RUBRO IS NOT NULL;
+END;
+GO
 
 CREATE PROCEDURE InsertIntoProducto
 AS
@@ -458,8 +463,8 @@ BEGIN
     m.PRODUCTO_MOD_CODIGO, 
     m.PRODUCTO_PRECIO
 FROM gd_esquema.Maestra m
-LEFT JOIN #subrubro sr ON sr.nombre = m.PRODUCTO_SUB_RUBRO
-LEFT JOIN #marca ma ON ma.marca = m.PRODUCTO_MARCA
+LEFT JOIN subrubro sr ON sr.nombre = m.PRODUCTO_SUB_RUBRO
+LEFT JOIN marca ma ON ma.marca = m.PRODUCTO_MARCA
 WHERE m.PRODUCTO_CODIGO IS NOT NULL
 END;
 GO
@@ -521,9 +526,63 @@ BEGIN
 END;
 GO
 
-/*publicacion*/
+CREATE PROCEDURE InsertIntoPublicacion
+AS
+BEGIN
+	INSERT INTO publicacion (publicacion_codigo, descripcion, fecha_inicio, fecha_fin,
+		producto_id, stock, precio, vendedor_id, almacen_codigo,
+		costo, porcentaje)
+	SELECT DISTINCT
+		PUBLICACION_CODIGO,
+		PUBLICACION_DESCRIPCION,
+		PUBLICACION_FECHA,
+		PUBLICACION_FECHA_V,
+		prod.producto_id, 
+		PUBLICACION_STOCK,
+		v.vendedor_id, 
+		a.almacen_codigo, 
+		PUBLICACION_COSTO,
+		PUBLICACION_PRECIO,
+		PUBLICACION_PORC_VENTA
+	FROM 
+        [GD2C2024].[gd_esquema].[Maestra] m
+	INNER JOIN producto prod ON
+		m.PRODUCTO_CODIGO = prod.producto_codigo
+	INNER JOIN vendedor v ON 
+		m.VENDEDOR_CUIT = v.cuit
+		AND m.VENDEDOR_MAIL = v.mail
+		AND m.VENDEDOR_RAZON_SOCIAL = v.razon_social
+	INNER JOIN almacen a ON 
+		m.ALMACEN_CODIGO = a.almacen_codigo
+	WHERE PUBLICACION_CODIGO IS NOT NULL	
+END;
+GO
 
-/* detalle_factura */
+CREATE PROCEDURE InsertIntoDetalleFactura
+AS
+BEGIN
+	INSERT INTO detalle_factura (publicacion_codigo, factura_numero, 
+		concepto_id, precio, cantidad, subtotal)
+	SELECT DISTINCT
+		p.publicacion_codigo,
+		f.factura_numero,
+		c.concepto_id,
+		FACTURA_DET_PRECIO,
+		FACTURA_DET_CANTIDAD,
+		FACTURA_DET_SUBTOTAL
+	FROM 
+		[GD2C2024].[gd_esquema].[Maestra] m
+	INNER JOIN publicacion p 
+		ON m.PUBLICACION_CODIGO = p.publicacion_codigo
+	INNER JOIN factura f 
+		ON m.FACTURA_NUMERO = f.factura_numero
+	INNER JOIN concepto c
+		ON m.FACTURA_DET_TIPO = c.nombre
+	WHERE m.FACTURA_NUMERO IS NOT NULL
+		AND m.PUBLICACION_CODIGO IS NOT NULL
+		AND m.FACTURA_DET_TIPO IS NOT NULL;
+END;
+GO
 
 CREATE PROCEDURE InsertIntoDetalleVenta
 AS
@@ -650,13 +709,13 @@ EXEC InsertIntoDomicilio;
 EXEC InsertIntoMarca;
 EXEC InsertIntoModelo;
 EXEC InsertIntoRubro;
-EXEC InsertIntoSubrubro;
+EXEC InsertIntoSubRubro;
 EXEC InsertIntoProducto;
 EXEC InsertIntoAlmacen;
-/*factura*/
-/*concepto*/
-/*publicacion*/
-/* detalle_factura */
+EXEC InsertIntoFactura;
+EXEC InsertIntoConcepto;
+EXEC InsertIntoPublicacion;
+EXEC InsertIntoDetalleFactura; 
 EXEC InsertIntoDetalleVenta;
 EXEC InsertIntoVenta;
 EXEC InsertIntoMedioPago;
