@@ -1,14 +1,16 @@
 /*orden principal*/
 
-CREATE TABLE localidad (
-     localidad_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-    nombre NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL
+CREATE TABLE provincia (
+    provincia_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    nombre NVARCHAR(50) NOT NULL
 );
 GO
 
-CREATE TABLE provincia (
-    provincia_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-    nombre NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL
+CREATE TABLE localidad (
+    localidad_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    nombre NVARCHAR(50) NOT NULL,
+	provincia_id INT NOT NULL,
+	FOREIGN KEY (provincia_id) REFERENCES #provincia(provincia_id)
 );
 GO
 
@@ -49,12 +51,10 @@ CREATE TABLE domicilio (
     piso DECIMAL(18, 0) NOT NULL,
     depto NVARCHAR(50) NOT NULL,
     cp NVARCHAR(50) NOT NULL,
-    provincia_id INT NOT NULL,
     localidad_id INT NOT NULL,
     usuario_id INT NOT NULL,
     FOREIGN KEY (usuario_id) REFERENCES #usuario(usuario_id),
-    FOREIGN KEY (localidad_id) REFERENCES #localidad(localidad_id),
-    FOREIGN KEY (provincia_id) REFERENCES #provincia(provincia_id)
+    FOREIGN KEY (localidad_id) REFERENCES #localidad(localidad_id)
 );
 GO
 
@@ -104,8 +104,7 @@ CREATE TABLE almacen (
     localidad_id INTEGER NOT NULL,
     provincia_id INTEGER NOT NULL,
     costo_dia_al DECIMAL(18,2) NOT NULL,
-    FOREIGN KEY (localidad_id) REFERENCES #localidad(localidad_id),
-    FOREIGN KEY (provincia_id) REFERENCES #provincia(provincia_id)
+    FOREIGN KEY (localidad_id) REFERENCES #localidad(localidad_id)
 );
 
 CREATE TABLE factura (
@@ -234,31 +233,6 @@ GO
 /* PROCEDURES*/
 
 
-CREATE PROCEDURE InsertIntoLocalidad
-AS
-BEGIN
-    INSERT INTO localidad (nombre)
-    SELECT DISTINCT nombre
-    FROM (
-        SELECT VEN_USUARIO_DOMICILIO_LOCALIDAD AS nombre
-        FROM gd_esquema.Maestra
-        WHERE VEN_USUARIO_DOMICILIO_LOCALIDAD IS NOT NULL
-
-        UNION
-
-        SELECT CLI_USUARIO_DOMICILIO_LOCALIDAD AS nombre
-        FROM gd_esquema.Maestra
-        WHERE CLI_USUARIO_DOMICILIO_LOCALIDAD IS NOT NULL
-
-        UNION
-
-        SELECT ALMACEN_Localidad AS nombre
-        FROM gd_esquema.Maestra
-        WHERE ALMACEN_Localidad IS NOT NULL
-    ) localidades;
-END;
-GO
-
 CREATE PROCEDURE InsertIntoProvincia
 AS
 BEGIN
@@ -281,6 +255,34 @@ BEGIN
         FROM gd_esquema.Maestra
         WHERE ALMACEN_PROVINCIA IS NOT NULL
     ) provincias;
+END;
+GO
+
+CREATE PROCEDURE InsertIntoLocalidad
+AS
+BEGIN
+    INSERT INTO localidad (nombre, provincia_id)
+    SELECT DISTINCT nombre, provincia_id
+    FROM (
+        SELECT VEN_USUARIO_DOMICILIO_LOCALIDAD nombre, VEN_USUARIO_DOMICILIO_PROVINCIA 
+        FROM gd_esquema.Maestra m INNER JOIN provincia p 
+	ON m.VEN_USUARIO_DOMICILIO_PROVINCIA = p.nombre
+        WHERE VEN_USUARIO_DOMICILIO_LOCALIDAD IS NOT NULL
+
+        UNION
+
+        SELECT CLI_USUARIO_DOMICILIO_LOCALIDAD AS nombre
+         FROM gd_esquema.Maestra m INNER JOIN provincia p 
+	ON m.CLI_USUARIO_DOMICILIO_PROVINCIA = p.nombre
+        WHERE CLI_USUARIO_DOMICILIO_LOCALIDAD IS NOT NULL
+
+        UNION
+
+        SELECT ALMACEN_Localidad AS nombre
+         FROM gd_esquema.Maestra m INNER JOIN provincia p 
+	ON m.ALMACEN_PROVINCIA = p.nombre
+        WHERE ALMACEN_Localidad IS NOT NULL
+    ) localidades;
 END;
 GO
 
@@ -350,7 +352,7 @@ GO
 CREATE PROCEDURE InsertIntoDomicilio
 AS
 BEGIN
-    INSERT INTO domicilio (calle, nro_calle, piso, depto, cp, usuario_id, provincia_id, localidad_id)
+    INSERT INTO domicilio (calle, nro_calle, piso, depto, cp, usuario_id, localidad_id)
     SELECT DISTINCT 
         calle,
         nro_calle,
@@ -358,7 +360,6 @@ BEGIN
         depto,
         cp,
         usuario_id,
-        provincia_id,
         localidad_id
     FROM (
         SELECT 
@@ -368,8 +369,7 @@ BEGIN
             CLI_USUARIO_DOMICILIO_DEPTO depto,
             CLI_USUARIO_DOMICILIO_CP cp,
             u.usuario_id,
-            l.localidad_id,
-            p.provincia_id
+            l.localidad_id
         FROM 
             gd_esquema.Maestra m 
         INNER JOIN usuario u ON 
@@ -378,11 +378,9 @@ BEGIN
             m.CLI_USUARIO_FECHA_CREACION = u.fecha_creacion
         INNER JOIN localidad l ON 
             m.CLI_USUARIO_DOMICILIO_LOCALIDAD = l.nombre
-        INNER JOIN provincia p ON 
-            m.CLI_USUARIO_DOMICILIO_PROVINCIA = p.nombre
         WHERE CLI_USUARIO_DOMICILIO_CALLE IS NOT NULL
 
-        UNION ALL
+        UNION
 
         SELECT 
             VEN_USUARIO_DOMICILIO_CALLE calle,
@@ -391,8 +389,7 @@ BEGIN
             VEN_USUARIO_DOMICILIO_DEPTO depto,
             VEN_USUARIO_DOMICILIO_CP cp,
             u.usuario_id, 
-            l.localidad_id,
-            p.provincia_id
+            l.localidad_id
         FROM 
             gd_esquema.Maestra m 
 	INNER JOIN usuario u ON 
@@ -401,8 +398,6 @@ BEGIN
             m.VEN_USUARIO_FECHA_CREACION = u.fecha_creacion
         INNER JOIN localidad l ON 
             m.VEN_USUARIO_DOMICILIO_LOCALIDAD = l.nombre
-        INNER JOIN provincia p ON 
-            m.VEN_USUARIO_DOMICILIO_PROVINCIA = p.nombre
         WHERE VEN_USUARIO_DOMICILIO_CALLE IS NOT NULL
     ) domicilios;
 END;
@@ -472,19 +467,16 @@ GO
 CREATE PROCEDURE InsertIntoAlmacen
 AS
 BEGIN
-    INSERT INTO almacen(almacen_codigo, calle, nro_calle, costo_dia_al, localidad_id, provincia_id)
+    INSERT INTO almacen(almacen_codigo, calle, nro_calle, costo_dia_al, localidad_id)
     SELECT DISTINCT 
         ALMACEN_CODIGO,
         ALMACEN_CALLE,
         ALMACEN_NRO_CALLE,
         ALMACEN_COSTO_DIA_AL,
-        l.localidad_id,
-        p.provincia_id
+        l.localidad_id
     FROM gd_esquema.Maestra m 
     INNER JOIN localidad l ON 
         m.ALMACEN_LOCALIDAD = l.nombre
-    INNER JOIN provincia p ON 
-        m.ALMACEN_PROVINCIA = p.nombre
 END;
 GO
 
