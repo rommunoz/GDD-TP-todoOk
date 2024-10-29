@@ -16,7 +16,7 @@ CREATE TABLE usuario (
     usuario_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
     nombre NVARCHAR(50) NOT NULL,
     pass NVARCHAR(50) NOT NULL,
-    fecha_creacion DATE DEFAULT GETDATE() NOT NULL
+    fecha_creacion DATE NOT NULL
 );
 GO
 
