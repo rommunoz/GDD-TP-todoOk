@@ -586,8 +586,8 @@ GO
 CREATE PROCEDURE InsertIntoVenta
 AS
 BEGIN
-    INSERT INTO venta (codigo_venta, usuario_id, fecha, total, detalle_venta_id)
-    SELECT VENTA_CODIGO, USUARIO_ID, VENTA_FECHA, VENTA_TOTAL, dv.detalle_venta_id
+INSERT INTO venta (codigo_venta, usuario_id, fecha_hora, total, detalle_venta_id)
+    SELECT VENTA_CODIGO,u.usuario_id , VENTA_FECHA, VENTA_TOTAL, dv.detalle_venta_id
     FROM 
         gd_esquema.Maestra m 
     INNER JOIN detalle_venta dv ON 
@@ -595,8 +595,12 @@ BEGIN
         AND m.VENTA_DET_PRECIO = dv.precio 
         AND m.VENTA_DET_CANT = dv.cantidad_vendida 
         AND m.VENTA_DET_SUB_TOTAL = dv.sub_total
+	INNER JOIN usuario u ON
+m.CLI_USUARIO_NOMBRE = u.nombre AND
+            m.CLI_USUARIO_PASS = u.pass AND
+            m.CLI_USUARIO_FECHA_CREACION = u.fecha_creacion
     WHERE 
-        VENTA_CODIGO IS NOT NULL;
+        VENTA_CODIGO IS NOT NULL;;
 END;
 GO
 
