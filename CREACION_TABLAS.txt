@@ -10,7 +10,7 @@ CREATE TABLE localidad (
     localidad_id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
     nombre NVARCHAR(50) NOT NULL,
 	provincia_id INT NOT NULL,
-	FOREIGN KEY (provincia_id) REFERENCES #provincia(provincia_id)
+	FOREIGN KEY (provincia_id) REFERENCES provincia(provincia_id)
 );
 GO
 
@@ -40,7 +40,7 @@ CREATE TABLE vendedor (
     razon_social NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
     cuit NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
     mail NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES #usuario(usuario_id)
+    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
 );
 GO
 
@@ -53,8 +53,8 @@ CREATE TABLE domicilio (
     cp NVARCHAR(50) NOT NULL,
     localidad_id INT NOT NULL,
     usuario_id INT NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES #usuario(usuario_id),
-    FOREIGN KEY (localidad_id) REFERENCES #localidad(localidad_id)
+    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id),
+    FOREIGN KEY (localidad_id) REFERENCES localidad(localidad_id)
 );
 GO
 
@@ -80,7 +80,7 @@ CREATE TABLE subrubro(
 	subrubro_id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
 	nombre NVARCHAR(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
 	rubro_id INT NOT NULL,
-	FOREIGN KEY (rubro_id) REFERENCES #rubro(rubro_id) 
+	FOREIGN KEY (rubro_id) REFERENCES rubro(rubro_id) 
 );
 GO
 
@@ -92,8 +92,8 @@ CREATE TABLE producto (
 	marca_id INT NOT NULL,
 	modelo_codigo DECIMAL(18,0) NOT NULL,
 	precio DECIMAL(18,2) NOT NULL,
-	FOREIGN KEY (marca_id) REFERENCES #marca(marca_id),
-	FOREIGN KEY (modelo_codigo) REFERENCES #modelo(modelo_codigo)
+	FOREIGN KEY (marca_id) REFERENCES marca(marca_id),
+	FOREIGN KEY (modelo_codigo) REFERENCES modelo(modelo_codigo)
 );
 GO
 
@@ -104,7 +104,7 @@ CREATE TABLE almacen (
     localidad_id INTEGER NOT NULL,
     provincia_id INTEGER NOT NULL,
     costo_dia_al DECIMAL(18,2) NOT NULL,
-    FOREIGN KEY (localidad_id) REFERENCES #localidad(localidad_id)
+    FOREIGN KEY (localidad_id) REFERENCES localidad(localidad_id)
 );
 
 CREATE TABLE factura (
@@ -112,7 +112,7 @@ CREATE TABLE factura (
     fecha DATE NOT NULL,
     usuario_id INT NOT NULL,
     total DECIMAL(18,2) NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES #usuario(usuario_id)
+    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
 );
 GO
 
@@ -352,7 +352,7 @@ GO
 CREATE PROCEDURE InsertIntoDomicilio
 AS
 BEGIN
-    INSERT INTO #domicilio (calle, nro_calle, piso, depto, cp, usuario_id, localidad_id)
+    INSERT INTO domicilio (calle, nro_calle, piso, depto, cp, usuario_id, localidad_id)
     SELECT DISTINCT calle, nro_calle, piso, depto, cp, usuario_id, localidad_id
     FROM (
         SELECT 
@@ -475,9 +475,9 @@ BEGIN
         ALMACEN_COSTO_DIA_AL,
         l.localidad_id
     FROM gd_esquema.Maestra m 
-	INNER JOIN #provincia p 
+	INNER JOIN provincia p 
 	ON m.ALMACEN_PROVINCIA = p.nombre
-       INNER JOIN #localidad l 
+       INNER JOIN localidad l 
 	ON m.ALMACEN_Localidad = l.nombre AND l.provincia_id = p.provincia_id
 END;
 GO
@@ -485,32 +485,25 @@ GO
 CREATE PROCEDURE InsertIntoPublicacion
 AS
 BEGIN
-	INSERT INTO publicacion (publicacion_codigo, descripcion, fecha_inicio, fecha_fin,
-		producto_id, stock, vendedor_id, almacen_codigo,
-		costo, precio, porcentaje)
-	SELECT DISTINCT
-		PUBLICACION_CODIGO,
-		PUBLICACION_DESCRIPCION,
-		PUBLICACION_FECHA,
-		PUBLICACION_FECHA_V,
-		prod.producto_id, 
-		PUBLICACION_STOCK,
-		v.vendedor_id, 
-		a.almacen_codigo, 
-		PUBLICACION_COSTO,
-		PUBLICACION_PRECIO,
-		PUBLICACION_PORC_VENTA
-	FROM 
-        gd_esquema.Maestra m
-	INNER JOIN producto prod ON
-		m.PRODUCTO_CODIGO = prod.producto_codigo
-	INNER JOIN vendedor v ON 
-		m.VENDEDOR_CUIT = v.cuit
-		AND m.VENDEDOR_MAIL = v.mail
-		AND m.VENDEDOR_RAZON_SOCIAL = v.razon_social
-	INNER JOIN almacen a ON 
-		m.ALMACEN_CODIGO = a.almacen_codigo
-	WHERE PUBLICACION_CODIGO IS NOT NULL	
+	SELECT DISTINCT 
+        m.PUBLICACION_CODIGO,
+		m.PUBLICACION_DESCRIPCION, 
+		m.PUBLICACION_FECHA,  
+		m.PUBLICACION_FECHA_V,
+		p.producto_id, 
+		m.PUBLICACION_STOCK,
+		m.PUBLICACION_PRECIO,
+        v.vendedor_id,                                    
+        a.almacen_codigo,                                                 
+        m.PUBLICACION_COSTO, 
+        m.PUBLICACION_PORC_VENTA
+    FROM gd_esquema.Maestra AS m
+    JOIN vendedor AS v ON v.razon_social = m.VENDEDOR_RAZON_SOCIAL
+    JOIN (SELECT MAX(producto_id) AS producto_id, producto_codigo FROM producto GROUP BY producto_codigo) AS p
+        ON p.producto_codigo = m.PRODUCTO_CODIGO
+    JOIN almacen a
+        ON a.almacen_codigo = m.ALMACEN_CODIGO
+    WHERE m.PUBLICACION_DESCRIPCION IS NOT NULL;
 END;
 GO
 
@@ -667,7 +660,7 @@ GO
 CREATE PROCEDURE InsertIntoEnvio
 AS
 BEGIN
-    INSERT INTO #envio(codigo_venta, domicilio_id, fecha_programada, hora_inicio, hora_fin, costo, fecha_entrega, tipo_envio_id)
+    INSERT INTO envio(codigo_venta, domicilio_id, fecha_programada, hora_inicio, hora_fin, costo, fecha_entrega, tipo_envio_id)
     SELECT DISTINCT 
         v.codigo_venta,
         d.domicilio_id,
@@ -679,15 +672,15 @@ BEGIN
         te.tipo_envio_id
     FROM 
         gd_esquema.Maestra m 
-	JOIN #domicilio d ON 
+	JOIN domicilio d ON 
         m.CLI_USUARIO_DOMICILIO_CALLE = d.calle AND
 		m.CLI_USUARIO_DOMICILIO_NRO_CALLE = d.nro_calle AND
 		m.CLI_USUARIO_DOMICILIO_PISO = d.piso AND
 		m.CLI_USUARIO_DOMICILIO_DEPTO = d.depto AND
 		m.CLI_USUARIO_DOMICILIO_CP = d.cp 
-    JOIN #venta v ON 
+    JOIN venta v ON 
         m.VENTA_CODIGO = v.codigo_venta
-    JOIN #tipo_envio te ON 
+    JOIN tipo_envio te ON 
         m.ENVIO_TIPO = te.nombre
 
     WHERE ENVIO_HORA_INICIO IS NOT NULL;
