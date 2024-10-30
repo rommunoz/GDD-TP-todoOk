@@ -352,52 +352,52 @@ GO
 CREATE PROCEDURE InsertIntoDomicilio
 AS
 BEGIN
-    INSERT INTO domicilio (calle, nro_calle, piso, depto, cp, usuario_id, localidad_id)
-    SELECT DISTINCT 
-        calle,
-        nro_calle,
-        piso,
-        depto,
-        cp,
-        usuario_id,
-        localidad_id
+    INSERT INTO #domicilio (calle, nro_calle, piso, depto, cp, usuario_id, localidad_id)
+    SELECT DISTINCT calle, nro_calle, piso, depto, cp, usuario_id, localidad_id
     FROM (
         SELECT 
-            CLI_USUARIO_DOMICILIO_CALLE calle,
-            CLI_USUARIO_DOMICILIO_NRO_CALLE nro_calle,
-            CLI_USUARIO_DOMICILIO_PISO piso,
-            CLI_USUARIO_DOMICILIO_DEPTO depto,
-            CLI_USUARIO_DOMICILIO_CP cp,
+            CLI_USUARIO_DOMICILIO_CALLE AS calle,
+            CLI_USUARIO_DOMICILIO_NRO_CALLE AS nro_calle,
+            CLI_USUARIO_DOMICILIO_PISO AS piso,
+            CLI_USUARIO_DOMICILIO_DEPTO AS depto,
+            CLI_USUARIO_DOMICILIO_CP AS cp,
             u.usuario_id,
             l.localidad_id
         FROM 
             gd_esquema.Maestra m 
-        INNER JOIN usuario u ON 
+        JOIN usuario u ON 
             m.CLI_USUARIO_NOMBRE = u.nombre AND
             m.CLI_USUARIO_PASS = u.pass AND
             m.CLI_USUARIO_FECHA_CREACION = u.fecha_creacion
-        INNER JOIN localidad l ON 
-            m.CLI_USUARIO_DOMICILIO_LOCALIDAD = l.nombre
+	JOIN provincia p ON
+			m.CLI_USUARIO_DOMICILIO_PROVINCIA = p.nombre
+        JOIN localidad l ON 
+            m.CLI_USUARIO_DOMICILIO_LOCALIDAD = l.nombre AND
+			l.provincia_id = p.provincia_id
+			
         WHERE CLI_USUARIO_DOMICILIO_CALLE IS NOT NULL
 
         UNION
 
         SELECT 
-            VEN_USUARIO_DOMICILIO_CALLE calle,
-            VEN_USUARIO_DOMICILIO_NRO_CALLE nro_calle,
-            VEN_USUARIO_DOMICILIO_PISO piso,
-            VEN_USUARIO_DOMICILIO_DEPTO depto,
-            VEN_USUARIO_DOMICILIO_CP cp,
+            VEN_USUARIO_DOMICILIO_CALLE AS calle,
+            VEN_USUARIO_DOMICILIO_NRO_CALLE AS nro_calle,
+            VEN_USUARIO_DOMICILIO_PISO AS piso,
+            VEN_USUARIO_DOMICILIO_DEPTO AS depto,
+            VEN_USUARIO_DOMICILIO_CP AS cp,
             u.usuario_id, 
             l.localidad_id
         FROM 
             gd_esquema.Maestra m 
-	INNER JOIN usuario u ON 
+        JOIN usuario u ON 
             m.VEN_USUARIO_NOMBRE = u.nombre AND
             m.VEN_USUARIO_PASS = u.pass AND
             m.VEN_USUARIO_FECHA_CREACION = u.fecha_creacion
-        INNER JOIN localidad l ON 
-            m.VEN_USUARIO_DOMICILIO_LOCALIDAD = l.nombre
+        JOIN provincia p ON
+			m.CLI_USUARIO_DOMICILIO_PROVINCIA = p.nombre
+        JOIN localidad l ON 
+            m.CLI_USUARIO_DOMICILIO_LOCALIDAD = l.nombre AND
+			l.provincia_id = p.provincia_id
         WHERE VEN_USUARIO_DOMICILIO_CALLE IS NOT NULL
     ) domicilios;
 END;
@@ -475,8 +475,10 @@ BEGIN
         ALMACEN_COSTO_DIA_AL,
         l.localidad_id
     FROM gd_esquema.Maestra m 
-    INNER JOIN localidad l ON 
-        m.ALMACEN_LOCALIDAD = l.nombre
+	INNER JOIN #provincia p 
+	ON m.ALMACEN_PROVINCIA = p.nombre
+       INNER JOIN #localidad l 
+	ON m.ALMACEN_Localidad = l.nombre AND l.provincia_id = p.provincia_id
 END;
 GO
 
