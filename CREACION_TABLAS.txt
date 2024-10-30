@@ -200,7 +200,7 @@ CREATE TABLE pago(
 	importe DECIMAL(18,2) NOT NULL,
 	medio_pago_id INT NOT NULL,
 	tipo_medio_pago_id INT NOT NULL,
-	fecha DECIMAL(18,2) NOT NULL,
+	fecha DATE NOT NULL,
 	FOREIGN KEY (codigo_venta) REFERENCES venta(codigo_venta),
 	FOREIGN KEY (detalle_pago_id) REFERENCES detalle_pago(detalle_pago_id),
 	FOREIGN KEY (medio_pago_id) REFERENCES medio_pago(medio_pago_id),
@@ -667,10 +667,10 @@ GO
 CREATE PROCEDURE InsertIntoEnvio
 AS
 BEGIN
-    INSERT INTO envio(codigo_venta, domicilio_id, fecha_programada, hora_inicio, hora_fin, costo, fecha_entrega, tipo_envio_id)
+    INSERT INTO #envio(codigo_venta, domicilio_id, fecha_programada, hora_inicio, hora_fin, costo, fecha_entrega, tipo_envio_id)
     SELECT DISTINCT 
         v.codigo_venta,
-        u.domicilio_id,
+        d.domicilio_id,
         ENVIO_FECHA_PROGAMADA,
         ENVIO_HORA_INICIO,
         ENVIO_HORA_FIN_INICIO,
@@ -679,12 +679,17 @@ BEGIN
         te.tipo_envio_id
     FROM 
         gd_esquema.Maestra m 
-    INNER JOIN venta v ON 
+	JOIN #domicilio d ON 
+        m.CLI_USUARIO_DOMICILIO_CALLE = d.calle AND
+		m.CLI_USUARIO_DOMICILIO_NRO_CALLE = d.nro_calle AND
+		m.CLI_USUARIO_DOMICILIO_PISO = d.piso AND
+		m.CLI_USUARIO_DOMICILIO_DEPTO = d.depto AND
+		m.CLI_USUARIO_DOMICILIO_CP = d.cp 
+    JOIN #venta v ON 
         m.VENTA_CODIGO = v.codigo_venta
-    INNER JOIN tipo_envio te ON 
+    JOIN #tipo_envio te ON 
         m.ENVIO_TIPO = te.nombre
-    INNER JOIN usuario u ON 
-        v.usuario_id = u.usuario_id
+
     WHERE ENVIO_HORA_INICIO IS NOT NULL;
 END;
 GO
