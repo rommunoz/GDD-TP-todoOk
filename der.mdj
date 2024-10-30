@@ -2100,6 +2100,21 @@
 										},
 										{
 											"_type": "ERDColumnView",
+											"_id": "AAAAAAGS3pen4gnexLQ=",
+											"_parent": {
+												"$ref": "AAAAAAGSIQpmTlCCaeA="
+											},
+											"model": {
+												"$ref": "AAAAAAGS3penywnbZN4="
+											},
+											"font": "Arial;13;0",
+											"left": 2045,
+											"top": 851,
+											"width": 230.65966796875,
+											"height": 13
+										},
+										{
+											"_type": "ERDColumnView",
 											"_id": "AAAAAAGSIRGZfVCaNB4=",
 											"_parent": {
 												"$ref": "AAAAAAGSIQpmTlCCaeA="
@@ -2109,7 +2124,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 2045,
-											"top": 851,
+											"top": 866,
 											"width": 230.65966796875,
 											"height": 13
 										}
@@ -2118,14 +2133,14 @@
 									"left": 2040,
 									"top": 831,
 									"width": 240.65966796875,
-									"height": 38
+									"height": 53
 								}
 							],
 							"font": "Arial;13;0",
 							"left": 2040,
 							"top": 808,
 							"width": 240.65966796875,
-							"height": 64,
+							"height": 76,
 							"nameLabel": {
 								"$ref": "AAAAAAGSIQpmTlCBm+c="
 							},
@@ -5521,9 +5536,9 @@
 							"_parent": {
 								"$ref": "AAAAAAGR7JZf48pDlQg="
 							},
-							"name": "modelo_codigo",
-							"type": "DECIMAL",
-							"length": "18,0",
+							"name": "modelo_id",
+							"type": "INTEGER",
+							"length": 0,
 							"foreignKey": true
 						},
 						{
@@ -6692,10 +6707,20 @@
 							"_parent": {
 								"$ref": "AAAAAAGSIQpmTVB+neA="
 							},
+							"name": "modelo_id",
+							"type": "INTEGER",
+							"length": 0,
+							"primaryKey": true
+						},
+						{
+							"_type": "ERDColumn",
+							"_id": "AAAAAAGS3penywnbZN4=",
+							"_parent": {
+								"$ref": "AAAAAAGSIQpmTVB+neA="
+							},
 							"name": "modelo_codigo",
 							"type": "DECIMAL",
-							"length": "18,0",
-							"primaryKey": true
+							"length": "18,0"
 						},
 						{
 							"_type": "ERDColumn",

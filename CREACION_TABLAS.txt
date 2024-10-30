@@ -102,7 +102,6 @@ CREATE TABLE almacen (
     nro_calle DECIMAL(18,0) NOT NULL,
     calle NVARCHAR(50) NOT NULL,
     localidad_id INTEGER NOT NULL,
-    provincia_id INTEGER NOT NULL,
     costo_dia_al DECIMAL(18,2) NOT NULL,
     FOREIGN KEY (localidad_id) REFERENCES localidad(localidad_id)
 );
