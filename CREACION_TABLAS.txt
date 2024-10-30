@@ -640,10 +640,10 @@ CREATE PROCEDURE InsertIntoPago
 AS
 BEGIN
     INSERT INTO pago (codigo_venta, detalle_pago_id, importe, medio_pago_id, tipo_medio_pago_id, fecha)
-    SELECT DISTINCT 
+    SELECT DISTINCT
+	v.codigo_venta,
         (SELECT detalle_pago_id FROM detalle_pago WHERE nro_tarjeta = gd_esquema.Maestra.PAGO_NRO_TARJETA AND fecha_venc_tarjeta = gd_esquema.Maestra.PAGO_FECHA_VENC_TARJETA),
         PAGO_IMPORTE, 
-        v.codigo_venta
         (SELECT medio_pago_id FROM medio_pago WHERE medio_pago = gd_esquema.Maestra.PAGO_MEDIO_PAGO), 
         (SELECT tipo_medio_pago_id FROM tipo_medio_pago WHERE tipo_medio_pago = gd_esquema.Maestra.PAGO_TIPO_MEDIO_PAGO), 
         PAGO_FECHA
