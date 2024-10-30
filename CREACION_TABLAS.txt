@@ -130,12 +130,12 @@ CREATE TABLE publicacion (
     producto_id INTEGER NOT NULL, 
     stock DECIMAL(18,0) NOT NULL, 
     precio DECIMAL(18,2) NOT NULL, 
-    vendedor_id INTEGER NOT NULL, 
+    usuario_id INTEGER NOT NULL, 
     almacen_codigo DECIMAL(18,0) NOT NULL,  
     costo DECIMAL(18,2) NOT NULL, 
     porcentaje DECIMAL(18,2) NOT NULL,
     FOREIGN KEY (producto_id) REFERENCES producto(producto_id),
-    FOREIGN KEY (vendedor_id) REFERENCES vendedor(vendedor_id),
+    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id),
     FOREIGN KEY (almacen_codigo) REFERENCES almacen(almacen_codigo)
 );
 GO
@@ -485,6 +485,9 @@ GO
 CREATE PROCEDURE InsertIntoPublicacion
 AS
 BEGIN
+	INSERT INTO publicacion (publicacion_codigo, descripcion, fecha_inicio, fecha_fin,
+		producto_id, stock, usuario_id, almacen_codigo,
+		costo, precio, porcentaje)
 	SELECT DISTINCT 
         m.PUBLICACION_CODIGO,
 		m.PUBLICACION_DESCRIPCION, 
@@ -493,12 +496,15 @@ BEGIN
 		p.producto_id, 
 		m.PUBLICACION_STOCK,
 		m.PUBLICACION_PRECIO,
-        v.vendedor_id,                                    
+        v.usuario_id,                                    
         a.almacen_codigo,                                                 
         m.PUBLICACION_COSTO, 
         m.PUBLICACION_PORC_VENTA
     FROM gd_esquema.Maestra AS m
-    JOIN vendedor AS v ON v.razon_social = m.VENDEDOR_RAZON_SOCIAL
+    JOIN vendedor AS v 
+		ON m.VENDEDOR_RAZON_SOCIAL = v.razon_social
+		AND m.VENDEDOR_CUIT = v.cuit
+		AND m.VENDEDOR_MAIL = v.mail
     JOIN (SELECT MAX(producto_id) AS producto_id, producto_codigo FROM producto GROUP BY producto_codigo) AS p
         ON p.producto_codigo = m.PRODUCTO_CODIGO
     JOIN almacen a
@@ -521,7 +527,7 @@ BEGIN
 	INNER JOIN publicacion p
 		ON m.PUBLICACION_CODIGO = p.publicacion_codigo
 	INNER JOIN vendedor v 
-		ON p.vendedor_id = v.vendedor_id
+		ON p.usuario_id = v.usuario_id
     WHERE m.FACTURA_NUMERO IS NOT NULL;
 END;
 GO
@@ -635,9 +641,9 @@ AS
 BEGIN
     INSERT INTO pago (codigo_venta, detalle_pago_id, importe, medio_pago_id, tipo_medio_pago_id, fecha)
     SELECT DISTINCT 
-        v.codigo_venta
         (SELECT detalle_pago_id FROM detalle_pago WHERE nro_tarjeta = gd_esquema.Maestra.PAGO_NRO_TARJETA AND fecha_venc_tarjeta = gd_esquema.Maestra.PAGO_FECHA_VENC_TARJETA),
         PAGO_IMPORTE, 
+        v.codigo_venta
         (SELECT medio_pago_id FROM medio_pago WHERE medio_pago = gd_esquema.Maestra.PAGO_MEDIO_PAGO), 
         (SELECT tipo_medio_pago_id FROM tipo_medio_pago WHERE tipo_medio_pago = gd_esquema.Maestra.PAGO_TIPO_MEDIO_PAGO), 
         PAGO_FECHA
