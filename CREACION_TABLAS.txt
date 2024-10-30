@@ -264,21 +264,21 @@ BEGIN
     INSERT INTO localidad (nombre, provincia_id)
     SELECT DISTINCT nombre, provincia_id
     FROM (
-        SELECT VEN_USUARIO_DOMICILIO_LOCALIDAD nombre, VEN_USUARIO_DOMICILIO_PROVINCIA 
+        SELECT VEN_USUARIO_DOMICILIO_LOCALIDAD nombre, p.provincia_id
         FROM gd_esquema.Maestra m INNER JOIN provincia p 
 	ON m.VEN_USUARIO_DOMICILIO_PROVINCIA = p.nombre
         WHERE VEN_USUARIO_DOMICILIO_LOCALIDAD IS NOT NULL
 
         UNION
 
-        SELECT CLI_USUARIO_DOMICILIO_LOCALIDAD AS nombre
+        SELECT CLI_USUARIO_DOMICILIO_LOCALIDAD nombre, p.provincia_id
          FROM gd_esquema.Maestra m INNER JOIN provincia p 
 	ON m.CLI_USUARIO_DOMICILIO_PROVINCIA = p.nombre
         WHERE CLI_USUARIO_DOMICILIO_LOCALIDAD IS NOT NULL
 
         UNION
 
-        SELECT ALMACEN_Localidad AS nombre
+        SELECT ALMACEN_Localidad nombre, p.provincia_id
          FROM gd_esquema.Maestra m INNER JOIN provincia p 
 	ON m.ALMACEN_PROVINCIA = p.nombre
         WHERE ALMACEN_Localidad IS NOT NULL
