@@ -394,9 +394,9 @@ BEGIN
             m.VEN_USUARIO_PASS = u.pass AND
             m.VEN_USUARIO_FECHA_CREACION = u.fecha_creacion
         JOIN provincia p ON
-			m.CLI_USUARIO_DOMICILIO_PROVINCIA = p.nombre
+			m.VEN_USUARIO_DOMICILIO_PROVINCIA = p.nombre
         JOIN localidad l ON 
-            m.CLI_USUARIO_DOMICILIO_LOCALIDAD = l.nombre AND
+            m.VEN_USUARIO_DOMICILIO_LOCALIDAD = l.nombre AND
 			l.provincia_id = p.provincia_id
         WHERE VEN_USUARIO_DOMICILIO_CALLE IS NOT NULL
     ) domicilios;
