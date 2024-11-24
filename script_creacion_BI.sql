@@ -18,10 +18,10 @@ CREATE TABLE todoOk.BI_Dimension_Ubicacion(
 
 CREATE TABLE todoOk.BI_Dimension_Tiempo(
     d_tiempo_id               INTEGER IDENTITY(1,1) NOT NULL,
-    tiempo_fecha            DATE,
-    tiempo_anio             INTEGER,
-    tiempo_cuatrimestre     INTEGER,
-    tiempo_mes              INTEGER
+    fecha            DATE,
+    anio             INTEGER,
+    cuatrimestre     INTEGER,
+    mes              INTEGER
 )
 
 CREATE TABLE todoOk.BI_Dimension_Subrubro(
@@ -62,13 +62,13 @@ CREATE TABLE todoOk.BI_Dimension_Tipo_Envio(
 
 -------Tablas de hechos--------------------
 CREATE TABLE todoOk.BI_Hechos_Envios (
-    h_envio_id              INTEGER,
-    d_ubicacion_id          INTEGER,   
-    d_tiempo_id             INTEGER,
-    d_rango_etario_id       INTEGER,
-    total_envios            INTEGER,
-    total_envios_cumplidos  INTEGER,
-    costo                   DECIMAL(18,2)
+    h_envio_id          INTEGER IDENTITY(1,1),
+    d_ubicacion_id      INTEGER,
+    d_tiempo_id         INTEGER,
+    d_rango_etario_id   INTEGER,
+    fecha_programada    DATE,
+    cumplido            SMALLINT,
+    costo               DECIMAL(18,2)
 )
 -- PK
 ALTER TABLE todoOk.BI_Hechos_Envios ADD CONSTRAINT PK_BI_Hechos_Envios PRIMARY KEY (h_envio_id)
@@ -79,8 +79,12 @@ ALTER TABLE todoOk.BI_Hechos_Envios ADD CONSTRAINT FK_BI_Dimension_Rango_Etario 
 ----
 
 CREATE TABLE todoOk.BI_Hechos_Factura(
-    h_factura_
-EGRETNI d
+    h_factura_id    INTEGER IDENTITY(1,1),
+    d_concepto_id   INTEGER,
+    d_ubicacion_id  INTEGER,
+    d_tiempo_id     INTEGER,
+    total_concepto  DECIMAL(16,2),
+    total_factura   DECIMAL(16,2)
 )
 
 CREATE TABLE todoOk.BI_Hechos_Ventas(
@@ -98,7 +102,7 @@ CREATE TABLE todoOk.BI_Hechos_Ventas(
 -- PK
 ALTER TABLE todoOk.BI_Hechos_Ventas ADD CONSTRAINT PK_BI_Hechos_Ventas PRIMARY KEY (h_venta_id)
 -- FK 
-ALTER TABLE todoOk.BI_Hecho_Ventas ADD CON
+
 
 CREATE TABLE todoOk.BI_Hechos_Publicacion(
     h_publicacion_id        INTEGER IDENTITY(1,1),
@@ -147,13 +151,89 @@ ADD CONSTRAINT PK_BI_Dimension_Tipo_Envio PRIMARY KEY (d_tipo_envio_id);
 
 ------------CONSTRAINTS FORANEAS----------------
 
+-----------FUNCIONES-----------------------------
+CREATE FUNCTION todoOk.fx_Obtener_Rango_Etario (@fecha_nacimiento DATE)
+    RETURNS NVARCHAR(50)
+AS
+BEGIN
+    DECLARE @edad INT
+    DECLARE @rango_etario NVARCHAR(50)
+
+    SET @edad = DATEDIFF(YEAR, @fecha_nacimiento, GETDATE())
+        - CASE WHEN MONTH(@fecha_nacimiento) > MONTH(GETDATE())
+            OR (MONTH(@fecha_nacimiento) = MONTH(GETDATE()) AND DAY(@fecha_nacimiento) > DAY(GETDATE()))
+                   THEN 1 ELSE 0 END
+
+    -- Determinar el rango etario
+    SET @rango_etario = CASE
+                            WHEN @edad < 25 THEN '<25'
+                            WHEN @edad BETWEEN 25 AND 35 THEN '25-35'
+                            WHEN @edad BETWEEN 36 AND 50 THEN '35-50'
+                            WHEN @edad > 50 THEN '>50'
+                            ELSE 'FUERA_DE_RANGO'
+        END
+
+    RETURN @rango_etario
+END
+GO
+
+
+CREATE FUNCTION todoOk.calcular_rango_horario (@HORARIO DATETIME)
+    RETURNS SMALLINT
+AS
+BEGIN
+    DECLARE @HORA INT = DATEPART(HOUR, @HORARIO)
+    DECLARE @RES SMALLINT
+    IF @HORA BETWEEN 8 AND 12
+        SET @RES = 1
+    ELSE
+        IF @HORA BETWEEN 12 AND 16
+            SET @RES = 2
+        ELSE
+            SET @RES = 3
+    RETURN @RES
+END
+GO
+
+--ROMAN
+CREATE FUNCTION todoOk.fx_fecha_cumplida (@fecha_programada DATE, @fecha_entrega DATE)
+    RETURNS SMALLINT
+AS
+BEGIN
+    DECLARE @envioCumplido SMALLINT = 0;
+    IF DATEPART(DAY, @fecha_programada, @fecha_entrega) > 0
+        RETURN @envioCumplido
+    SET @envioCumplido = 1
+    RETURN @envioCumplido
+END
+GO
+
+CREATE FUNCTION todoOk.CALCULAR_FECHA(@FECHA DATETIME)
+    RETURNS SMALLINT
+AS
+BEGIN
+    DECLARE @ANIO INT
+    DECLARE @CUATRIMESTRE INT
+    DECLARE @MES INT
+
+    SELECT @ANIO = YEAR(@FECHA), @CUATRIMESTRE = DATEPART(QUARTER,@FECHA), @MES = MONTH(@FECHA)
+    RETURN (select TIEMPO_ID from BI_D_TIEMPO
+            where
+                @ANIO = TIEMPO_ANIO AND
+                @CUATRIMESTRE = TIEMPO_CUATRIMESTRE AND
+                @MES = TIEMPO_MES
+    )
+END
+GO
+
+
 ------------MIGRACIONES------------------------
-------------TABLAS DE DDIMENSIONES----------
+------------TABLAS DE DIMENSIONES----------
 
 CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Rango_Etario
 AS
 BEGIN
-    INSERT INTO BI_Dimension_Rango_Etario()
+    INSERT INTO BI_Dimension_Rango_Etario(descripcion)
     VALUES ('<25')
     INSERT INTO BI_Dimension_Rango_Etario(descripcion)
     VALUES ('25-35')
@@ -161,8 +241,8 @@ BEGIN
     VALUES ('35-50')
     INSERT INTO BI_Dimension_Rango_Etario(descripcion)
     VALUES ('>50')
-    INSERT INTO BI_Dimension_Rango_Etario(descripcion)
-    VALUES ('FUERA_DE_RANGO')
+--     INSERT INTO BI_Dimension_Rango_Etario(descripcion)
+--     VALUES ('FUERA_DE_RANGO')
 END
 GO
 
@@ -180,47 +260,91 @@ BEGIN
 END
 GO
 
--- Migración Ubicacion
-
-CREATE PROCEDURE todoOk.BI_MIGRAR_D_UBICACION
+CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Ubicacion
 AS
 BEGIN
-    INSERT INTO BI_D_UBICACION(UBI_PROVINCIA, UBI_LOCALIDAD)
-        (SELECT prov_nombre, localidad_nombre
-         FROM todoOk.Localidad
-                  JOIN todoOk.Provincia P ON P.prov_cod = Localidad.localidad_prov)
+    INSERT INTO BI_Dimension_Ubicacion(provincia, localidad)
+        (SELECT l.nombre, p.nombre
+         FROM todoOk.localidad l JOIN todoOk.provincia p ON (p.provincia_id = l.provincia_id))
 END
 GO
 
--- Migración Tiempo
-
-CREATE PROCEDURE todoOk.BI_MIGRAR_D_TIEMPO
+CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Tiempo
 AS
 BEGIN
     -- noinspection SqlShouldBeInGroupBy
-    INSERT INTO BI_D_TIEMPO(TIEMPO_ANIO, TIEMPO_CUATRIMESTRE, TIEMPO_MES)
-        (SELECT YEAR(ticket_fecha), DATEPART(QUARTER, ticket_fecha), MONTH(ticket_fecha)
-         FROM todoOk.Ticket
-         GROUP BY YEAR(ticket_fecha), DATEPART(QUARTER, ticket_fecha), MONTH(ticket_fecha)
+    INSERT INTO BI_Dimension_Tiempo( fecha, anio, cuatrimestre, mes)
+        (SELECT YEAR(fecha), DATEPART(QUARTER, fecha), MONTH(fecha)
+         FROM todoOk.venta
+         GROUP BY YEAR(fecha), DATEPART(QUARTER, venta_fecha), MONTH(fecha)
          UNION
-         SELECT YEAR(pago_fecha), DATEPART(QUARTER, pago_fecha), MONTH(pago_fecha)
-         FROM todoOk.Pago
-         GROUP BY YEAR(pago_fecha), DATEPART(QUARTER, pago_fecha), MONTH(pago_fecha)
+         SELECT YEAR(fecha_entrega), DATEPART(QUARTER, fecha_entrega), MONTH(fecha_entrega)
+         FROM todoOk.envio
+         GROUP BY YEAR(fecha_entrega), DATEPART(QUARTER, fecha_entrega), MONTH(fecha_entrega)
          UNION
-         SELECT YEAR(prog_env_fecha_programacion),
-                DATEPART(QUARTER, prog_env_fecha_programacion),
-                MONTH(prog_env_fecha_programacion)
-         FROM todoOk.Programacion_Envio
-         GROUP BY YEAR(prog_env_fecha_programacion), DATEPART(QUARTER, prog_env_fecha_programacion),
-                  MONTH(prog_env_fecha_programacion))
+         SELECT YEAR(fecha_programada), DATEPART(QUARTER, fecha_programada), MONTH(fecha_programada)
+         FROM todoOk.envio
+         GROUP BY YEAR(fecha_programada), DATEPART(QUARTER, fecha_programada), MONTH(fecha_programada)
+         UNION
+         SELECT YEAR(fecha_inicio), DATEPART(QUARTER, fecha_inicio), MONTH(fecha_inicio)
+         FROM todoOk.publicacion
+         GROUP BY YEAR(fecha_inicio), DATEPART(QUARTER, fecha_inicio), MONTH(fecha_inicio)
+         UNION
+         SELECT YEAR(fecha_fin), DATEPART(QUARTER, fecha_fin), MONTH(fecha_fin)
+         FROM todoOk.publicacion
+         GROUP BY YEAR(fecha_fin), DATEPART(QUARTER, fecha_fin), MONTH(fecha_fin)
+         UNION
+         SELECT YEAR(fecha), DATEPART(QUARTER, fecha), MONTH(fecha)
+         FROM todoOk.pago
+         GROUP BY YEAR(fecha), DATEPART(QUARTER, fecha), MONTH(fecha)
+         UNION
+         SELECT YEAR(fecha), DATEPART(QUARTER, fecha), MONTH(fecha)
+         FROM todoOk.factura
+         GROUP BY YEAR(fecha), DATEPART(QUARTER, fecha), MONTH(fecha))
 END
 GO
 
--- Migracion de medio pago
-CREATE PROCEDURE todoOk.BI_MIGRAR_D_MEDIO_PAGO
+CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Medio_Pago
 AS
 BEGIN
-    INSERT INTO BI_D_MEDIO_PAGO(MP_DETALLE, MP_TIPO)
-        (select MP_detalle, MP_TIPO from todoOk.Medio_pago)
+    INSERT INTO BI_Dimension_Medio_Pago(descripcion)
+        (SELECT medio_pago from todoOk.medio_pago)
 END
 GO
+
+CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Rubro
+AS
+BEGIN
+    INSERT INTO BI_Dimension_Rubro (descripcion)
+        (SELECT descripcion FROM todoOk.rubro)
+END
+
+CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Marca
+AS
+BEGIN
+    INSERT INTO BI_Dimension_Marca (marca)
+        (SELECT marca FROM todoOk.marca)
+END
+
+CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Concepto
+AS
+BEGIN
+    INSERT INTO BI_Dimension_Concepto (nombre)
+        (SELECT nombre FROM todoOk.concepto)
+END
+
+------HACER----------------
+CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Publicacion
+AS
+BEGIN
+    INSERT INTO BI_Dimension_Publicacion ()
+        (SELECT  FROM todoOk.publicacion)
+END
+
+CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Tipo_Envio
+AS
+BEGIN
+    INSERT INTO BI_Dimension_Tipo_Envio ()
+        (SELECT FROM todoOk.tipo_envio)
+END
+
