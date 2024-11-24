@@ -110,7 +110,7 @@ CREATE TABLE todoOk.BI_Dimension_Rango_Etario(
 )
 
 CREATE TABLE todoOk.BI_Dimension_Rango_Horario(
-    d_rango_horario_id         INTEGER IDENTITY(1,1) NOT NULL,
+    d_rango_horario_id       INTEGER IDENTITY(1,1) NOT NULL,
     descripcion              NVARCHAR(50)
 )
 
@@ -144,13 +144,13 @@ CREATE TABLE todoOk.BI_Dimension_Marca(
 )
 
 CREATE TABLE todoOk.BI_Dimension_Rubro(
-    d_rubro_id              INTEGER IDENTITY(1,1) NOT NULL,
+    d_rubro_id            INTEGER IDENTITY(1,1) NOT NULL,
     descripcion_rubro     NVARCHAR(50)
 ) 
 
 CREATE TABLE todoOk.BI_Dimension_Concepto(
     d_concepto_id           INTEGER IDENTITY(1,1) NOT NULL,
-    descripcion           NVARCHAR(50)  NOT NULL
+    nombre           NVARCHAR(50)  NOT NULL
 )
 
 CREATE TABLE todoOk.BI_Dimension_Publicacion(
@@ -163,6 +163,7 @@ CREATE TABLE todoOk.BI_Dimension_Tipo_Envio(
     d_tipo_envio_id       INTEGER IDENTITY(1,1) NOT NULL,
     nombre                 NVARCHAR(50)  NOT NULL
 )
+
 
 -------Tablas de hechos--------------------
 CREATE TABLE todoOk.BI_Hechos_Envios (
@@ -192,13 +193,8 @@ CREATE TABLE todoOk.BI_Hechos_Ventas(
     rango_etario_id        INTEGER,
     tiempo_id              INTEGER,
     total_importe          DECIMAL(18,2),
-    cantidad_vendida       INTEGER,
-    venta_rubro            INTEGER,       
-    cant_ventas_horario    INTEGER
+    cantidad_vendida       INTEGER
 )
--- PK
-ALTER TABLE todoOk.BI_Hechos_Ventas ADD CONSTRAINT PK_BI_Hechos_Ventas PRIMARY KEY (h_venta_id)
--- FK 
 
 
 CREATE TABLE todoOk.BI_Hechos_Publicacion(
@@ -270,7 +266,7 @@ ALTER TABLE todoOk.BI_Hechos_Publicacion
 
 ALTER TABLE todoOk.BI_Hechos_Pago
     ADD CONSTRAINT PK_BI_Hechos_Pago PRIMARY KEY (h_pago_id);
-
+GO
 ------------CONSTRAINTS FORANEAS----------------
 --------Tablas de hechos-----------
 --Hechos_Envios
@@ -331,6 +327,7 @@ ALTER TABLE todoOk.BI_Hechos_Pago
 
 ALTER TABLE todoOk.BI_Hechos_Pago
     ADD CONSTRAINT FK_BI_Hechos_Pago_Ubicacion FOREIGN KEY (d_ubicacion_id) REFERENCES todoOk.BI_Dimension_Ubicacion(d_ubicacion_id);
+GO
 
 -----------FUNCIONES-----------------------------
 CREATE FUNCTION todoOk.fx_obtener_rango_etario (@fecha_nacimiento DATE)
@@ -373,6 +370,7 @@ BEGIN
 
     RETURN @tiempo_id;
 END
+GO
 
 --ver si usamos esto, devuelve turno dependiendo del rango horario, supongo que para performance
 CREATE FUNCTION todoOk.fx_obtener_turno (@horario DATETIME)
@@ -394,6 +392,25 @@ BEGIN
     RETURN @turno
 END
 GO
+
+CREATE FUNCTION todoOk.fx_obtener_rango_horario (@horario DATETIME)
+    RETURNS NVARCHAR(50)
+AS
+BEGIN
+    DECLARE @hora INT = DATEPART(HOUR, @horario)
+    DECLARE @rango_horario NVARCHAR(50)
+
+    SET @rango_horario = CASE
+                            WHEN @hora BETWEEN 0 AND 5 THEN '00:00 - 06:00'
+                            WHEN @hora BETWEEN 6 AND 11 THEN '06:00 - 12:00'
+                            WHEN @hora BETWEEN 12 AND 17 THEN '12:00 - 18:00'
+                            ELSE '18:00 - 24:00'
+                         END
+
+    RETURN @rango_horario
+END
+GO
+
 
 /*
 CREATE FUNCTION todoOk.CALCULAR_FECHA(@FECHA DATETIME)
@@ -461,9 +478,9 @@ AS
 BEGIN
     -- noinspection SqlShouldBeInGroupBy
     INSERT INTO BI_Dimension_Tiempo( anio, cuatrimestre, mes)
-        (SELECT YEAR(fecha), DATEPART(QUARTER, fecha), MONTH(fecha)
+        (SELECT YEAR(fecha_hora), DATEPART(QUARTER, fecha_hora), MONTH(fecha_hora)
          FROM todoOk.venta
-         GROUP BY YEAR(fecha), DATEPART(QUARTER, venta_fecha), MONTH(fecha)
+         GROUP BY YEAR(fecha_hora), DATEPART(QUARTER, fecha_hora), MONTH(fecha_hora)
          UNION
          SELECT YEAR(fecha_entrega), DATEPART(QUARTER, fecha_entrega), MONTH(fecha_entrega)
          FROM todoOk.envio
@@ -509,7 +526,7 @@ GO
 CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Rubro
 AS
 BEGIN
-    INSERT INTO BI_Dimension_Rubro (descripcion)
+    INSERT INTO BI_Dimension_Rubro (descripcion_rubro)
         (SELECT descripcion FROM todoOk.rubro)
 END
 GO
@@ -560,11 +577,11 @@ BEGIN
     ) (
     SELECT
         dim_u.d_ubicacion_id,
-        (SELECT d_tiempo_id
+        (SELECT t.d_tiempo_id
          FROM todoOk.BI_Dimension_Tiempo t
-         WHERE t.anio = YEAR(e.fecha_inicio)
-           AND t.mes = MONTH(e.fecha_inicio)
-           AND t.cuatrimestre = ((MONTH(e.fecha_inicio) - 1) / 4 + 1)
+         WHERE t.anio = YEAR(e.fecha_programada)
+           AND t.mes = MONTH(e.fecha_programada)
+           AND t.cuatrimestre = ((MONTH(e.fecha_programada) - 1) / 4 + 1)
         )                                                               AS d_tiempo_id,
         todoOk.fx_obtener_turno(e.hora_inicio)                  AS d_rango_horario_id,
         COUNT(e.fecha_programada),
@@ -586,8 +603,8 @@ AS
 BEGIN
     INSERT INTO todoOk.BI_Hechos_Factura (d_concepto_id, d_ubicacion_id, d_tiempo_id, total_concepto, total_factura)
     SELECT
-        (SELECT d_concepto_id FROM todoOk.BI_Dimension_Concepto dc
-            WHERE dc.descripcion = c.nombre)    AS d_concepto_id,
+        (SELECT dc.d_concepto_id FROM todoOk.BI_Dimension_Concepto dc
+            WHERE dc.nombre = c.nombre)    AS d_concepto_id,
         dim_u.d_ubicacion_id,
         (SELECT d_tiempo_id
          FROM todoOk.BI_Dimension_Tiempo t
@@ -606,7 +623,37 @@ BEGIN
         INNER JOIN todoOk.provincia p ON l.provincia_id = p.provincia_id
         INNER JOIN todoOk.BI_Dimension_Ubicacion dim_u
             ON l.nombre = dim_u.localidad AND p.nombre = dim_u.provincia
-    GROUP BY d_concepto_id, dim_u.d_ubicacion_id, d_tiempo_id
+    GROUP BY d_concepto_id, dim_u.d_ubicacion_id,  d_tiempo_id
+END
+GO
+----
+CREATE PROCEDURE todoOk.BI_Migrar_Hechos_Ventas
+AS
+BEGIN
+	INSERT INTO todoOk.BI_Hechos_Ventas ( ubicacion_id, rango_horario_id, rubro_id, rango_etario_id, tiempo_id, total_importe, cantidad_vendida)
+	SELECT 
+		dim_u.d_ubicacion_id,
+		dim_h.d_rango_horario_id,
+		r.rubro_id,
+		dim_e.d_rango_etario_id,
+		todoOk.fx_obtener_tiempo_id(v.fecha_hora) AS tiempo_id,
+		SUM(v.total) AS total_importe,
+		COUNT(DISTINCT codigo_venta)    
+	FROM todoOk.venta v
+	JOIN  todoOk.usuario u ON v.usuario_id = u.usuario_id
+	JOIN todoOk.cliente c ON c.usuario_id = u.usuario_id
+	JOIN todoOk.BI_Dimension_Rango_Horario dim_h  ON dim_h.descripcion = todoOk.fx_obtener_rango_horario(v.fecha_hora)
+	JOIN todoOk.detalle_venta dv ON v.detalle_venta_id = dv.detalle_venta_id
+	JOIN todoOk.publicacion pu ON dv.publicacion_codigo = pu.publicacion_codigo
+	JOIN todoOK.producto pro ON pu.producto_id = pro.producto_id
+	JOIN todoOK.subrubro sub ON pro.subrubro_id = sub.subrubro_id
+	JOIN todoOK.rubro r ON sub.rubro_id = r.rubro_id
+	JOIN todoOk.almacen a ON pu.almacen_codigo = a.almacen_codigo
+	JOIN todoOk.localidad l ON a.localidad_id = l.localidad_id
+	JOIN todoOk.provincia p ON l.provincia_id = p.provincia_id
+	JOIN  todoOk.BI_Dimension_Ubicacion dim_u ON dim_u.provincia = p.nombre AND dim_u.localidad = l.nombre
+	JOIN todoOk.BI_Dimension_Rango_Etario dim_e  ON dim_e.descripcion = todoOk.fx_obtener_rango_etario(c.fecha_nacimiento)
+	GROUP BY dim_u.d_ubicacion_id
 END
 GO
 ----
@@ -620,8 +667,8 @@ BEGIN
     JOIN todoOk.marca m ON (pr.marca_id = m.marca_id)
     JOIN todoOk.BI_Dimension_Marca dm ON (dm.marca = m.marca)
     JOIN todoOk.subrubro sb ON (pr.subrubro_id = sb.subrubro_id)
-    JOIN todoOk.BI_Dimension_Subrubro dsb ON(dsb.nombre_subrubro=sb.nombre)
-    JOIN todoOk.BI_Dimension_Publicacion dp ON (p.codigo = dp.codigo) AND (p.descripcion = dp.descripcion)
+    JOIN todoOk.BI_Dimension_Subrubro dsb ON(dsb.nombre_subrubro = sb.nombre)
+    JOIN todoOk.BI_Dimension_Publicacion dp ON (pu.publicacion_codigo = dp.codigo) AND (pu.descripcion = dp.descripcion)
 END
 GO
 
@@ -634,18 +681,17 @@ BEGIN
     SELECT dmp.d_tipo_medio_pago_id, todoOk.fx_obtener_tiempo_id(fecha), du.d_ubicacion_id, SUM(v.total)
     FROM todoOk.pago pa JOIN tipo_medio_pago mp ON (pa.tipo_medio_pago_id = mp.tipo_medio_pago_id)
     JOIN todoOk.BI_Dimension_Tipo_Medio_Pago dmp ON (mp.tipo_medio_pago = dmp.descripcion)
-    JOIN todoOk.venta v ON (v.venta_id = pa.venta_id)
+    JOIN todoOk.venta v ON (v.codigo_venta = pa.codigo_venta)
     JOIN todoOk.cliente c ON (c.usuario_id = v.usuario_id) -- lo pide la consigna
     JOIN todoOk.domicilio d ON (c.usuario_id =d.usuario_id)
     JOIN todoOk.localidad l ON (l.localidad_id = d.localidad_id)
     JOIN todoOk.provincia pr ON (pr.provincia_id = l.provincia_id)
     JOIN todoOk.BI_Dimension_Ubicacion du ON (pr.nombre = du.provincia) AND (l.nombre = du.localidad)
     JOIN todoOk.detalle_pago dp ON (dp.detalle_pago_id = pa.detalle_pago_id)
-    WHERE dt.cant_cuotas > 1
+    WHERE dp.cant_cuotas > 1
     GROUP BY dmp.d_tipo_medio_pago_id , MONTH(fecha), YEAR(fecha), du.d_ubicacion_id
 END
 GO
-
 
 ------VIEWS-----------------
 
@@ -660,22 +706,59 @@ GO
 CREATE VIEW todoOk.view_2_promedio_stock_inicial
 AS
     SELECT AVG(stock)
-    FROM todoOk.BI_Hechos_Publicacion p JOIN todoOk.BI_Dimension_Tiempo t
-        ON (p.d_tiempo_id=t.d_tiempo_id)
+    FROM todoOk.BI_Hechos_Publicacion p 
+	JOIN todoOk.BI_Dimension_Tiempo t ON (p.d_tiempo_id=t.d_tiempo_id)
     GROUP BY d_marca_id, anio
+GO
+
+CREATE VIEW todoOK.view_3_venta_promedio_mensual
+AS
+	SELECT provincia,
+		   dt.anio,
+		   dt.mes,
+		   CAST(v.total_importe/v.cantidad_vendida AS DECIMAL(12,2)) AS promedio_mensual
+	FROM todoOk.BI_Hechos_Ventas v
+	JOIN todoOk.BI_Dimension_Tiempo dt ON v.tiempo_id = dt.d_tiempo_id
+	JOIN todoOk.BI_Dimension_Ubicacion du ON du.d_ubicacion_id = v.ubicacion_id
+	GROUP BY provincia, dt.anio, dt.mes
+GO
+
+CREATE VIEW todoOK.view_4_rendimiento_de_rubros
+AS
+	SELECT top 5 
+		r.descripcion_rubro,
+		u.localidad,
+		v.rango_etario_id
+	FROM todoOk.BI_Hechos_Ventas v
+	JOIN todoOk.BI_Dimension_Rubro r on r.d_rubro_id = v.rubro_id
+	JOIN todoOK.BI_Dimension_Ubicacion u ON u.d_ubicacion_id = v.ubicacion_id
+	ORDER BY v.total_importe DESC
+GO
+
+CREATE VIEW todoOK.view_5_volumen_de_ventas
+AS
+	SELECT drh.descripcion,
+		   dt.anio,
+		   dt.mes,
+		   SUM(v.cantidad_vendida) AS cantidad_ventas
+	FROM todoOK.BI_Hechos_Ventas v
+			 JOIN todoOk.BI_Dimension_Tiempo dt ON dt.anio = v.tiempo_id
+			 JOIN todoOk.BI_Dimension_Rango_Horario drh ON drh.d_rango_horario_id = v.rango_horario_id
+	GROUP BY drh.descripcion, dt.anio, dt.mes
 GO
 
 CREATE VIEW todoOk.view_6_pago_en_cuotas
 AS
     SELECT TOP 3 localidad
-    FROM todoOk.BI_Hechos_Pago p JOIN todoOk.BI_Dimension_Ubicacion du ON (p.d_ubicacion_id=du.d_ubicacion_id)
-                                JOIN todoOk.BI_Dimension_Tiempo dt ON (p.d_tiempo_id=dt.d_tiempo_id)
+    FROM todoOk.BI_Hechos_Pago p 
+		JOIN todoOk.BI_Dimension_Ubicacion du ON (p.d_ubicacion_id=du.d_ubicacion_id)
+        JOIN todoOk.BI_Dimension_Tiempo dt ON (p.d_tiempo_id=dt.d_tiempo_id)
     ORDER BY importe_total DESC
 GO
 
 CREATE VIEW todoOk.view_7_porcentaje_cumplimiento_envios
 AS
-    SELECT SUM(he.cant_envios_cumplidos) / SUM(he.total_envios)
+    SELECT (SUM(he.cant_envios_cumplidos) / SUM(he.total_envios))
     FROM todoOk.BI_Hechos_Envios he
     JOIN todoOk.BI_Dimension_Ubicacion du
         ON he.d_ubicacion_id = du.d_ubicacion_id
@@ -702,7 +785,7 @@ AS
         ON hf.d_tiempo_id = dt.d_tiempo_id
     JOIN todoOk.BI_Dimension_Concepto dc
         ON hf.d_concepto_id = dc.d_concepto_id
-    GROUP BY dt.anio, dt.mes, dc.descripcion
+    GROUP BY dt.anio, dt.mes, dc.nombre
 GO
 
 CREATE VIEW todoOk.view_10_facturacion_por_provincia
@@ -714,3 +797,4 @@ AS
     JOIN todoOk.BI_Dimension_Tiempo dt
         ON hf.d_tiempo_id = dt.d_tiempo_id
     GROUP BY du.provincia, dt.cuatrimestre, dt.anio
+GO
