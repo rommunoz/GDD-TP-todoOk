@@ -1,54 +1,5 @@
-
+USE GD2C2024
 ------Drop Constraints-------------------
--------------primarias-------------
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Rango_Etario')
-ALTER TABLE todoOk.BI_Dimension_Rango_Etario DROP CONSTRAINT PK_BI_Dimension_Rango_Etario;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Rango_Horario')
-ALTER TABLE todoOk.BI_Dimension_Rango_Horario DROP CONSTRAINT PK_BI_Dimension_Rango_Horario;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Ubicacion')
-ALTER TABLE todoOk.BI_Dimension_Ubicacion DROP CONSTRAINT PK_BI_Dimension_Ubicacion;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Tiempo')
-ALTER TABLE todoOk.BI_Dimension_Tiempo DROP CONSTRAINT PK_BI_Dimension_Tiempo;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Subrubro')
-ALTER TABLE todoOk.BI_Dimension_Subrubro DROP CONSTRAINT PK_BI_Dimension_Subrubro;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Tipo_Medio_Pago')
-ALTER TABLE todoOk.BI_Dimension_Tipo_Medio_Pago DROP CONSTRAINT PK_BI_Dimension_Tipo_Medio_Pago;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Marca')
-ALTER TABLE todoOk.BI_Dimension_Marca DROP CONSTRAINT PK_BI_Dimension_Marca;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Rubro')
-ALTER TABLE todoOk.BI_Dimension_Rubro DROP CONSTRAINT PK_BI_Dimension_Rubro;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Concepto')
-ALTER TABLE todoOk.BI_Dimension_Concepto DROP CONSTRAINT PK_BI_Dimension_Concepto;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Publicacion')
-ALTER TABLE todoOk.BI_Dimension_Publicacion DROP CONSTRAINT PK_BI_Dimension_Publicacion;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Tipo_Envio')
-ALTER TABLE todoOk.BI_Dimension_Tipo_Envio DROP CONSTRAINT PK_BI_Dimension_Tipo_Envio;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Envios')
-ALTER TABLE todoOk.BI_Hechos_Envios DROP CONSTRAINT PK_BI_Hechos_Envios;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Factura')
-ALTER TABLE todoOk.BI_Hechos_Factura DROP CONSTRAINT PK_BI_Hechos_Factura;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Ventas')
-ALTER TABLE todoOk.BI_Hechos_Ventas DROP CONSTRAINT PK_BI_Hechos_Ventas;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Publicacion')
-ALTER TABLE todoOk.BI_Hechos_Publicacion DROP CONSTRAINT PK_BI_Hechos_Publicacion;
-
-IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Pago')
-ALTER TABLE todoOk.BI_Hechos_Pago DROP CONSTRAINT PK_BI_Hechos_Pago;
-
 -------------foraneas------------------
 IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BI_Hechos_Envios_Ubicacion')
 ALTER TABLE todoOk.BI_Hechos_Envios DROP CONSTRAINT FK_BI_Hechos_Envios_Ubicacion;
@@ -104,6 +55,55 @@ ALTER TABLE todoOk.BI_Hechos_Pago DROP CONSTRAINT FK_BI_Hechos_Pago_Tiempo;
 IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BI_Hechos_Pago_Ubicacion')
 ALTER TABLE todoOk.BI_Hechos_Pago DROP CONSTRAINT FK_BI_Hechos_Pago_Ubicacion;
 
+-------------primarias-------------
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Rango_Etario')
+ALTER TABLE todoOk.BI_Dimension_Rango_Etario DROP CONSTRAINT PK_BI_Dimension_Rango_Etario;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Rango_Horario')
+ALTER TABLE todoOk.BI_Dimension_Rango_Horario DROP CONSTRAINT PK_BI_Dimension_Rango_Horario;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Ubicacion')
+ALTER TABLE todoOk.BI_Dimension_Ubicacion DROP CONSTRAINT PK_BI_Dimension_Ubicacion;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Tiempo')
+ALTER TABLE todoOk.BI_Dimension_Tiempo DROP CONSTRAINT PK_BI_Dimension_Tiempo;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Subrubro')
+ALTER TABLE todoOk.BI_Dimension_Subrubro DROP CONSTRAINT PK_BI_Dimension_Subrubro;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Tipo_Medio_Pago')
+ALTER TABLE todoOk.BI_Dimension_Tipo_Medio_Pago DROP CONSTRAINT PK_BI_Dimension_Tipo_Medio_Pago;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Marca')
+ALTER TABLE todoOk.BI_Dimension_Marca DROP CONSTRAINT PK_BI_Dimension_Marca;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Rubro')
+ALTER TABLE todoOk.BI_Dimension_Rubro DROP CONSTRAINT PK_BI_Dimension_Rubro;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Concepto')
+ALTER TABLE todoOk.BI_Dimension_Concepto DROP CONSTRAINT PK_BI_Dimension_Concepto;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Publicacion')
+ALTER TABLE todoOk.BI_Dimension_Publicacion DROP CONSTRAINT PK_BI_Dimension_Publicacion;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Dimension_Tipo_Envio')
+ALTER TABLE todoOk.BI_Dimension_Tipo_Envio DROP CONSTRAINT PK_BI_Dimension_Tipo_Envio;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Envios')
+ALTER TABLE todoOk.BI_Hechos_Envios DROP CONSTRAINT PK_BI_Hechos_Envios;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Factura')
+ALTER TABLE todoOk.BI_Hechos_Factura DROP CONSTRAINT PK_BI_Hechos_Factura;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Ventas')
+ALTER TABLE todoOk.BI_Hechos_Ventas DROP CONSTRAINT PK_BI_Hechos_Ventas;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Publicacion')
+ALTER TABLE todoOk.BI_Hechos_Publicacion DROP CONSTRAINT PK_BI_Hechos_Publicacion;
+
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_BI_Hechos_Pago')
+ALTER TABLE todoOk.BI_Hechos_Pago DROP CONSTRAINT PK_BI_Hechos_Pago;
+
 ----------------drop tablas dimensiones------------
 -- Dimensiones
 IF OBJECT_ID('todoOk.BI_Dimension_Rango_Etario', 'U') IS NOT NULL
@@ -136,20 +136,8 @@ IF OBJECT_ID('todoOk.BI_Dimension_Publicacion', 'U') IS NOT NULL
 IF OBJECT_ID('todoOk.BI_Dimension_Tipo_Envio', 'U') IS NOT NULL
     DROP TABLE todoOk.BI_Dimension_Tipo_Envio;
 
-IF OBJECT_ID('todoOk.BI_Dimension_Promocion', 'U') IS NOT NULL
-    DROP TABLE todoOk.BI_Dimension_Promocion;
-
-IF OBJECT_ID('todoOk.BI_Dimension_Tipo_Pago', 'U') IS NOT NULL
-    DROP TABLE todoOk.BI_Dimension_Tipo_Pago;
-
-IF OBJECT_ID('todoOk.BI_Dimension_Turno', 'U') IS NOT NULL
-    DROP TABLE todoOk.BI_Dimension_Turno;
-
-IF OBJECT_ID('todoOk.BI_Dimension_Estado_Envio', 'U') IS NOT NULL
-    DROP TABLE todoOk.BI_Dimension_Estado_Envio;
-
-IF OBJECT_ID('todoOk.BI_Dimension_Metodo_Envio', 'U') IS NOT NULL
-    DROP TABLE todoOk.BI_Dimension_Metodo_Envio;
+IF OBJECT_ID('todoOk.BI_Dimension_Tipo_Medio_Pago', 'U') IS NOT NULL
+    DROP TABLE todoOk.BI_Dimension_Tipo_Medio_Pago;
 
 -----------------drop tablas hechos---------------
 IF OBJECT_ID('todoOk.BI_Hechos_Ventas', 'U') IS NOT NULL
@@ -176,6 +164,25 @@ IF OBJECT_ID('todoOk.fx_obtener_tiempo_id', 'FN') IS NOT NULL
 
 IF OBJECT_ID('todoOk.fx_obtener_rango_horario', 'FN') IS NOT NULL
     DROP FUNCTION todoOk.fx_obtener_rango_horario;
+--------------drop procedures------------------------------------
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Rango_Etario;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Rango_Horario;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Ubicacion;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Tiempo;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Tipo_Medio_Pago;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Subrubro;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Rubro;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Marca;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Concepto;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Publicacion;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Dimension_Tipo_Envio;
+
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Hecho_Envio;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Hechos_Factura;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Hechos_Ventas;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Hechos_Publicacion;
+DROP PROCEDURE IF EXISTS todoOk.BI_Migrar_Hechos_Pago;
+
 
 ----------------drop views--------------------------
 IF OBJECT_ID('todoOk.view_1_promedio_tiempo_publicaciones', 'V') IS NOT NULL
@@ -505,15 +512,11 @@ CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Rango_Etario
 AS
 BEGIN
     INSERT INTO BI_Dimension_Rango_Etario(descripcion)
-    VALUES ('<25')
-    INSERT INTO BI_Dimension_Rango_Etario(descripcion)
-    VALUES ('25-35')
-    INSERT INTO BI_Dimension_Rango_Etario(descripcion)
-    VALUES ('35-50')
-    INSERT INTO BI_Dimension_Rango_Etario(descripcion)
-    VALUES ('>50')
-    INSERT INTO BI_Dimension_Rango_Etario(descripcion)
-    VALUES ('FUERA_DE_RANGO')
+    VALUES ('<25'), 
+           ('25-35'), 
+           ('35-50'), 
+           ('>50'), 
+           ('FUERA_DE_RANGO');
 END
 GO
 
@@ -521,13 +524,10 @@ CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Rango_Horario
 AS
 BEGIN
     INSERT INTO BI_Dimension_Rango_Horario(descripcion)
-    VALUES ('00:00 - 06:00')
-    INSERT INTO BI_Dimension_Rango_Horario(descripcion)
-    VALUES ('06:00 - 12:00')
-    INSERT INTO BI_Dimension_Rango_Horario(descripcion)
-    VALUES ('12:00 - 18:00')
-    INSERT INTO BI_Dimension_Rango_Horario(descripcion)
-    VALUES ('18:00 - 24:00')
+    VALUES ('00:00 - 06:00'),
+           ('06:00 - 12:00'),
+           ('12:00 - 18:00'),
+           ('18:00 - 24:00');
 END
 GO
 
@@ -637,9 +637,9 @@ BEGIN
     INSERT INTO todoOk.BI_Hechos_Envios ( d_ubicacion_id,  d_tiempo_id,  d_rango_horario_id,  total_envios, cant_envios_cumplidos, costo) 
     SELECT
         dim_u.d_ubicacion_id,
-        todoOk.fx_obtener_tiempo_id(e.fecha_programada)  AS d_tiempo_id,
+        todoOk.fx_obtener_tiempo_id(e.fecha_programada) d_tiempo_id,
         dim_h.d_rango_horario_id,
-        COUNT(e.fecha_programada),
+        COUNT(e.envio_id),
         COUNT(CASE WHEN DATEDIFF(DAY, e.fecha_entrega, e.fecha_programada) <= 0 THEN 1 END),
         SUM(e.costo)
     FROM todoOk.envio e 
@@ -649,7 +649,7 @@ BEGIN
     INNER JOIN todoOk.provincia p ON l.provincia_id = p.provincia_id
     INNER JOIN todoOk.BI_Dimension_Ubicacion dim_u ON l.nombre = dim_u.localidad AND p.nombre = dim_u.provincia
 	JOIN todoOk.BI_Dimension_Rango_Horario dim_h  ON dim_h.descripcion = todoOk.fx_obtener_rango_horario(e.hora_inicio)
-    GROUP BY dim_u.d_ubicacion_id
+    GROUP BY dim_u.d_ubicacion_id,  todoOk.fx_obtener_tiempo_id(e.fecha_programada),  dim_h.d_rango_horario_id
 END
 GO
 ----
@@ -658,11 +658,9 @@ AS
 BEGIN
     INSERT INTO todoOk.BI_Hechos_Factura (d_concepto_id, d_ubicacion_id, d_tiempo_id, total_concepto, total_factura)
     SELECT
-        (SELECT dc.d_concepto_id 
-		 FROM todoOk.BI_Dimension_Concepto dc
-         WHERE dc.nombre = c.nombre)    AS d_concepto_id,
+         dc.d_concepto_id, 
          dim_u.d_ubicacion_id,
-        todoOk.fx_obtener_tiempo_id(f.fecha) AS d_tiempo_id,
+        todoOk.fx_obtener_tiempo_id(f.fecha) d_tiempo_id,
         SUM(df.subtotal),
         SUM(f.total)
     FROM todoOk.factura f
@@ -672,16 +670,16 @@ BEGIN
         INNER JOIN todoOk.domicilio d ON d.usuario_id = v.usuario_id
         INNER JOIN todoOk.localidad l ON d.localidad_id = l.localidad_id
         INNER JOIN todoOk.provincia p ON l.provincia_id = p.provincia_id
-        INNER JOIN todoOk.BI_Dimension_Ubicacion dim_u
-            ON l.nombre = dim_u.localidad AND p.nombre = dim_u.provincia
-    GROUP BY dim_u.d_ubicacion_id
+        INNER JOIN todoOk.BI_Dimension_Ubicacion dim_u ON l.nombre = dim_u.localidad AND p.nombre = dim_u.provincia
+		INNER JOIN todoOk.BI_Dimension_Concepto dc ON (dc.nombre = c.nombre)
+    GROUP BY dc.d_concepto_id, dim_u.d_ubicacion_id, todoOk.fx_obtener_tiempo_id(f.fecha)
 END
 GO
 ----
 CREATE PROCEDURE todoOk.BI_Migrar_Hechos_Ventas
 AS
 BEGIN
-	INSERT INTO todoOk.BI_Hechos_Ventas ( ubicacion_id, rango_horario_id, rubro_id, rango_etario_id, tiempo_id, total_importe, cantidad_vendida)
+	INSERT INTO todoOk.BI_Hechos_Ventas (ubicacion_id, rango_horario_id, rubro_id, rango_etario_id, tiempo_id, total_importe, cantidad_vendida)
 	SELECT 
 		dim_u.d_ubicacion_id,
 		dim_h.d_rango_horario_id,
@@ -704,7 +702,7 @@ BEGIN
 		JOIN todoOk.provincia p ON l.provincia_id = p.provincia_id
 		JOIN  todoOk.BI_Dimension_Ubicacion dim_u ON dim_u.provincia = p.nombre AND dim_u.localidad = l.nombre
 		JOIN todoOk.BI_Dimension_Rango_Etario dim_e  ON dim_e.descripcion = todoOk.fx_obtener_rango_etario(c.fecha_nacimiento)
-	GROUP BY dim_u.d_ubicacion_id
+	GROUP BY dim_u.d_ubicacion_id, dim_h.d_rango_horario_id, r.rubro_id, dim_e.d_rango_etario_id, todoOk.fx_obtener_tiempo_id(v.fecha_hora)
 END
 GO
 ----
@@ -750,10 +748,28 @@ BEGIN
 		JOIN todoOk.BI_Dimension_Ubicacion du ON (pr.nombre = du.provincia) AND (l.nombre = du.localidad)
 		JOIN todoOk.detalle_pago dp ON (dp.detalle_pago_id = pa.detalle_pago_id)
     WHERE dp.cant_cuotas > 1
-    GROUP BY dmp.d_tipo_medio_pago_id , MONTH(fecha), YEAR(fecha), du.d_ubicacion_id
+    GROUP BY dmp.d_tipo_medio_pago_id , todoOk.fx_obtener_tiempo_id(fecha) , du.d_ubicacion_id
 END
 GO
+-------EXEC----------------
+EXEC todoOk.BI_Migrar_Dimension_Rango_Etario; --5
+EXEC todoOk.BI_Migrar_Dimension_Rango_Horario;--4
+EXEC todoOk.BI_Migrar_Dimension_Ubicacion;--16918
+EXEC todoOk.BI_Migrar_Dimension_Tiempo;--25
+EXEC todoOk.BI_Migrar_Dimension_Tipo_Medio_Pago;--5
+EXEC todoOk.BI_Migrar_Dimension_Subrubro;--815
+EXEC todoOk.BI_Migrar_Dimension_Rubro;--22
+EXEC todoOk.BI_Migrar_Dimension_Marca;--4
+EXEC todoOk.BI_Migrar_Dimension_Concepto;--3
+EXEC todoOk.BI_Migrar_Dimension_Publicacion;--34629
+EXEC todoOk.BI_Migrar_Dimension_Tipo_Envio;--3
 
+EXEC todoOk.BI_Migrar_Hecho_Envio;--78
+EXEC todoOk.BI_Migrar_Hechos_Factura;--0
+EXEC todoOk.BI_Migrar_Hechos_Ventas;--0
+EXEC todoOk.BI_Migrar_Hechos_Publicacion;--700776
+EXEC todoOk.BI_Migrar_Hechos_Pago;--0
+GO
 ------VIEWS-----------------
 
 CREATE VIEW todoOk.view_1_promedio_tiempo_publicaciones
@@ -782,7 +798,7 @@ AS
 	SELECT provincia,
 		   dt.anio,
 		   dt.mes,
-		   CAST(v.total_importe/v.cantidad_vendida AS DECIMAL(12,2)) AS promedio_mensual
+		  CAST(SUM(v.total_importe) / SUM(v.cantidad_vendida) AS DECIMAL(12, 2)) AS promedio_mensual
 	FROM todoOk.BI_Hechos_Ventas v
 	JOIN todoOk.BI_Dimension_Tiempo dt ON v.tiempo_id = dt.d_tiempo_id
 	JOIN todoOk.BI_Dimension_Ubicacion du ON du.d_ubicacion_id = v.ubicacion_id
@@ -819,7 +835,7 @@ AS
     FROM todoOk.BI_Hechos_Pago p 
 		JOIN todoOk.BI_Dimension_Ubicacion du ON (p.d_ubicacion_id=du.d_ubicacion_id)
         JOIN todoOk.BI_Dimension_Tiempo dt ON (p.d_tiempo_id=dt.d_tiempo_id)
-    ORDER BY importe_total DESC
+	ORDER BY importe_total DESC
 GO
 
 CREATE VIEW todoOk.view_7_porcentaje_cumplimiento_envios
