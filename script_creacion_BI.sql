@@ -535,7 +535,7 @@ CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Ubicacion
 AS
 BEGIN
     INSERT INTO BI_Dimension_Ubicacion(provincia, localidad)
-        (SELECT l.nombre, p.nombre
+        (SELECT p.nombre, l.nombre
          FROM todoOk.localidad l JOIN todoOk.provincia p ON (p.provincia_id = l.provincia_id))
 END
 GO
@@ -579,7 +579,7 @@ CREATE PROCEDURE todoOk.BI_Migrar_Dimension_Tipo_Medio_Pago
 AS
 BEGIN
     INSERT INTO BI_Dimension_Tipo_Medio_Pago(descripcion)
-        (SELECT medio_pago from todoOk.medio_pago)
+        (SELECT tipo_medio_pago from todoOk.tipo_medio_pago)
 END
 GO
 
@@ -738,7 +738,7 @@ BEGIN
 		   du.d_ubicacion_id, 
 		   SUM(v.total)
     FROM todoOk.pago pa 
-		JOIN tipo_medio_pago mp ON (pa.tipo_medio_pago_id = mp.tipo_medio_pago_id)
+		JOIN todoOk.tipo_medio_pago mp ON (pa.tipo_medio_pago_id = mp.tipo_medio_pago_id)
 		JOIN todoOk.BI_Dimension_Tipo_Medio_Pago dmp ON (mp.tipo_medio_pago = dmp.descripcion)
 		JOIN todoOk.venta v ON (v.codigo_venta = pa.codigo_venta)
 		JOIN todoOk.cliente c ON (c.usuario_id = v.usuario_id) -- lo pide la consigna
@@ -756,7 +756,7 @@ EXEC todoOk.BI_Migrar_Dimension_Rango_Etario; --5
 EXEC todoOk.BI_Migrar_Dimension_Rango_Horario;--4
 EXEC todoOk.BI_Migrar_Dimension_Ubicacion;--16918
 EXEC todoOk.BI_Migrar_Dimension_Tiempo;--25
-EXEC todoOk.BI_Migrar_Dimension_Tipo_Medio_Pago;--5
+EXEC todoOk.BI_Migrar_Dimension_Tipo_Medio_Pago;--2
 EXEC todoOk.BI_Migrar_Dimension_Subrubro;--815
 EXEC todoOk.BI_Migrar_Dimension_Rubro;--22
 EXEC todoOk.BI_Migrar_Dimension_Marca;--4
@@ -764,11 +764,11 @@ EXEC todoOk.BI_Migrar_Dimension_Concepto;--3
 EXEC todoOk.BI_Migrar_Dimension_Publicacion;--34629
 EXEC todoOk.BI_Migrar_Dimension_Tipo_Envio;--3
 
-EXEC todoOk.BI_Migrar_Hecho_Envio;--78
-EXEC todoOk.BI_Migrar_Hechos_Factura;--0
-EXEC todoOk.BI_Migrar_Hechos_Ventas;--0
+EXEC todoOk.BI_Migrar_Hecho_Envio;--53168
+EXEC todoOk.BI_Migrar_Hechos_Factura;--2937
+EXEC todoOk.BI_Migrar_Hechos_Ventas;--13078
 EXEC todoOk.BI_Migrar_Hechos_Publicacion;--700776
-EXEC todoOk.BI_Migrar_Hechos_Pago;--0
+EXEC todoOk.BI_Migrar_Hechos_Pago;--63120
 GO
 ------VIEWS-----------------
 
