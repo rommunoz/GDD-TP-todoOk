@@ -1,8 +1,11 @@
 
 ------Drop Constraints-------------------
 -------------foraneas------------------
-IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BI_Hechos_Envios_Ubicacion')
-ALTER TABLE todoOk.BI_Hechos_Envios DROP CONSTRAINT FK_BI_Hechos_Envios_Ubicacion;
+IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BI_Hechos_Envios_Ubicacion_Cliente')
+ALTER TABLE todoOk.BI_Hechos_Envios DROP CONSTRAINT FK_BI_Hechos_Envios_Ubicacion_Cliente;
+
+IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BI_Hechos_Envios_Ubicacion_Almacen')
+ALTER TABLE todoOk.BI_Hechos_Envios DROP CONSTRAINT FK_BI_Hechos_Envios_Ubicacion_Almacen;
 
 IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BI_Hechos_Envios_Tiempo')
 ALTER TABLE todoOk.BI_Hechos_Envios DROP CONSTRAINT FK_BI_Hechos_Envios_Tiempo;
@@ -221,7 +224,7 @@ GO
 
 -------------Tablas de dimensiones--------------
 CREATE TABLE todoOk.BI_Dimension_Rango_Etario(
-    d_rango_etario_id           INTEGER IDENTITY(1,1) NOT NULL,
+    d_rango_etario_id         INTEGER IDENTITY(1,1) NOT NULL,
     descripcion               NVARCHAR(50)
 )
 
@@ -231,60 +234,61 @@ CREATE TABLE todoOk.BI_Dimension_Rango_Horario(
 )
 
 CREATE TABLE todoOk.BI_Dimension_Ubicacion(
-    d_ubicacion_id            INTEGER IDENTITY(1,1) NOT NULL,
-    provincia               NVARCHAR(50),
-    localidad               NVARCHAR(50)
+    d_ubicacion_id           INTEGER IDENTITY(1,1) NOT NULL,
+    provincia                NVARCHAR(50),
+    localidad                NVARCHAR(50)
 )
 
 CREATE TABLE todoOk.BI_Dimension_Tiempo(
-    d_tiempo_id               INTEGER IDENTITY(1,1) NOT NULL,
-    anio             INTEGER,
-    cuatrimestre     INTEGER,
-    mes              INTEGER
+    d_tiempo_id              INTEGER IDENTITY(1,1) NOT NULL,
+    anio                     INTEGER,
+    cuatrimestre             INTEGER,
+    mes                      INTEGER
 )
 
 CREATE TABLE todoOk.BI_Dimension_Subrubro(
     d_subrubro_id            INTEGER IDENTITY(1,1) NOT NULL,
-    descripcion_rubro      NVARCHAR(50),
-    nombre_subrubro        NVARCHAR(50)
+    descripcion_rubro        NVARCHAR(50),
+    nombre_subrubro          NVARCHAR(50)
 )
 
 CREATE TABLE todoOk.BI_Dimension_Tipo_Medio_Pago(
-    d_tipo_medio_pago_id         INTEGER IDENTITY(1,1) NOT NULL,
-    descripcion                  NVARCHAR(50)  NOT NULL
+    d_tipo_medio_pago_id     INTEGER IDENTITY(1,1) NOT NULL,
+    descripcion              NVARCHAR(50)  NOT NULL
 )
 
 CREATE TABLE todoOk.BI_Dimension_Marca(
-    d_marca_id              INTEGER IDENTITY(1,1) NOT NULL,
-    marca                 NVARCHAR(55)  
+    d_marca_id               INTEGER IDENTITY(1,1) NOT NULL,
+    marca                    NVARCHAR(55)  
 )
 
 CREATE TABLE todoOk.BI_Dimension_Rubro(
-    d_rubro_id            INTEGER IDENTITY(1,1) NOT NULL,
-    descripcion_rubro     NVARCHAR(50)
+    d_rubro_id               INTEGER IDENTITY(1,1) NOT NULL,
+    descripcion_rubro        NVARCHAR(50)
 ) 
 
 CREATE TABLE todoOk.BI_Dimension_Concepto(
-    d_concepto_id           INTEGER IDENTITY(1,1) NOT NULL,
-    nombre           NVARCHAR(50)  NOT NULL
+    d_concepto_id            INTEGER IDENTITY(1,1) NOT NULL,
+    nombre                   NVARCHAR(50)  NOT NULL
 )
 
 CREATE TABLE todoOk.BI_Dimension_Publicacion(
-    d_publicacion_id       INTEGER IDENTITY(1,1) NOT NULL,
-    codigo                  DECIMAL(18,0)  NOT NULL,
-    descripcion             NVARCHAR(50)  NOT NULL
+    d_publicacion_id         INTEGER IDENTITY(1,1) NOT NULL,
+    codigo                   DECIMAL(18,0)  NOT NULL,
+    descripcion              NVARCHAR(50)  NOT NULL
 )
 
 CREATE TABLE todoOk.BI_Dimension_Tipo_Envio(
-    d_tipo_envio_id       INTEGER IDENTITY(1,1) NOT NULL,
-    nombre                 NVARCHAR(50)  NOT NULL
+    d_tipo_envio_id          INTEGER IDENTITY(1,1) NOT NULL,
+    nombre                   NVARCHAR(50)  NOT NULL
 )
 
 
 -------Tablas de hechos--------------------
 CREATE TABLE todoOk.BI_Hechos_Envios (
     h_envio_id              INTEGER IDENTITY(1,1),
-    d_ubicacion_id          INTEGER,
+    d_ubicacion_cliente_id  INTEGER,
+    d_ubicacion_almacen_id  INTEGER,
     d_tiempo_id             INTEGER,
     d_rango_horario_id      INTEGER,
     total_envios            INTEGER,
@@ -293,23 +297,23 @@ CREATE TABLE todoOk.BI_Hechos_Envios (
 )
 
 CREATE TABLE todoOk.BI_Hechos_Factura(
-    h_factura_id    INTEGER IDENTITY(1,1),
-    d_concepto_id   INTEGER,
-    d_ubicacion_id  INTEGER,
-    d_tiempo_id     INTEGER,
-    total_concepto  DECIMAL(16,2),
-    total_factura   DECIMAL(16,2)
+    h_factura_id            INTEGER IDENTITY(1,1),
+    d_concepto_id           INTEGER,
+    d_ubicacion_id          INTEGER,
+    d_tiempo_id             INTEGER,
+    total_concepto          DECIMAL(16,2),
+    total_factura           DECIMAL(16,2)
 )
 
 CREATE TABLE todoOk.BI_Hechos_Ventas(
-    h_venta_id             INTEGER IDENTITY(1,1),
-	d_ubicacion_cliente_id   INTEGER,
-    d_ubicacion_almacen_id   INTEGER,
-    rango_horario_id       INTEGER,
-    rubro_id               INTEGER,
-    rango_etario_id        INTEGER,
-    tiempo_id              INTEGER,
-    total_importe          DECIMAL(18,2)
+    h_venta_id              INTEGER IDENTITY(1,1),
+	d_ubicacion_cliente_id  INTEGER,
+    d_ubicacion_almacen_id  INTEGER,
+    rango_horario_id        INTEGER,
+    rubro_id                INTEGER,
+    rango_etario_id         INTEGER,
+    tiempo_id               INTEGER,
+    total_importe           DECIMAL(18,2)
 )
 
 
@@ -324,7 +328,7 @@ CREATE TABLE todoOk.BI_Hechos_Publicacion(
 )
 
 CREATE TABLE todoOk.BI_Hechos_Pago(
-    h_pago_id              INTEGER IDENTITY(1,1),
+    h_pago_id               INTEGER IDENTITY(1,1),
     d_tipo_medio_pago_id    INTEGER,
     d_tiempo_id             INTEGER,
     d_ubicacion_id          INTEGER,
@@ -387,7 +391,10 @@ GO
 --------Tablas de hechos-----------
 --Hechos_Envios
 ALTER TABLE todoOk.BI_Hechos_Envios
-    ADD CONSTRAINT FK_BI_Hechos_Envios_Ubicacion FOREIGN KEY (d_ubicacion_id) REFERENCES todoOk.BI_Dimension_Ubicacion(d_ubicacion_id);
+    ADD CONSTRAINT FK_BI_Hechos_Envios_Ubicacion_Cliente FOREIGN KEY (d_ubicacion_cliente_id) REFERENCES todoOk.BI_Dimension_Ubicacion(d_ubicacion_id);
+
+ALTER TABLE todoOk.BI_Hechos_Envios
+    ADD CONSTRAINT FK_BI_Hechos_Envios_Ubicacion_Almacen FOREIGN KEY (d_ubicacion_almacen_id) REFERENCES todoOk.BI_Dimension_Ubicacion(d_ubicacion_id);
 
 ALTER TABLE todoOk.BI_Hechos_Envios
     ADD CONSTRAINT FK_BI_Hechos_Envios_Tiempo FOREIGN KEY (d_tiempo_id) REFERENCES todoOk.BI_Dimension_Tiempo(d_tiempo_id);
@@ -620,24 +627,31 @@ GO
 CREATE PROCEDURE todoOk.BI_Migrar_Hecho_Envio
 AS
 BEGIN
-    INSERT INTO todoOk.BI_Hechos_Envios ( d_ubicacion_id,  d_tiempo_id,  d_rango_horario_id,  total_envios, cant_envios_cumplidos, costo) 
+    INSERT INTO todoOk.BI_Hechos_Envios ( d_ubicacion_cliente_id ,d_ubicacion_almacen_id,  d_tiempo_id,  d_rango_horario_id,  total_envios, cant_envios_cumplidos, costo) 
     SELECT
-        dim_u.d_ubicacion_id,
+        dim_u_c.d_ubicacion_id,
+		dim_u_a.d_ubicacion_id,
         d_tiempo_id,
         dim_h.d_rango_horario_id,
         COUNT(e.envio_id),
-        COUNT(CASE WHEN DATEDIFF(DAY, e.fecha_entrega, e.fecha_programada) <= 0 THEN 1 END),
+        COUNT(CASE WHEN e.fecha_entrega <= e.fecha_programada THEN 1 END),
         SUM(e.costo)
     FROM todoOk.envio e 
 	INNER JOIN todoOk.domicilio d ON e.domicilio_id = d.domicilio_id
     INNER JOIN todoOk.cliente c ON d.usuario_id = c.usuario_id
     INNER JOIN todoOk.localidad l ON d.localidad_id = l.localidad_id
     INNER JOIN todoOk.provincia p ON l.provincia_id = p.provincia_id
-    INNER JOIN todoOk.BI_Dimension_Ubicacion dim_u ON l.nombre = dim_u.localidad AND p.nombre = dim_u.provincia
+    INNER JOIN todoOk.BI_Dimension_Ubicacion dim_u_c ON l.nombre = dim_u_c.localidad AND p.nombre = dim_u_c.provincia
+	JOIN todoOK.venta v ON e.codigo_venta = v.codigo_venta
+	JOIN todoOk.detalle_venta dv ON dv.cantidad_vendida = v.detalle_venta_id
+	JOIN todoOk.publicacion pu ON pu.publicacion_codigo = dv.publicacion_codigo
+	JOIN todoOk.almacen a ON a.almacen_codigo = pu.almacen_codigo
+	JOIN todoOk.localidad la ON a.localidad_id = la.localidad_id
+	JOIN todoOk.provincia pa ON la.provincia_id = pa.provincia_id
+	JOIN todoOk.BI_Dimension_Ubicacion dim_u_a ON dim_u_a.provincia = pa.nombre AND dim_u_a.localidad = la.nombre
 	JOIN todoOk.BI_Dimension_Rango_Horario dim_h  ON dim_h.descripcion = todoOk.fx_obtener_rango_horario(e.hora_inicio)
-	JOIN todoOk.BI_Dimension_Tiempo dt ON dt.anio = YEAR(e.fecha_programada)
-                                    AND dt.mes = MONTH(e.fecha_programada)
-    GROUP BY dim_u.d_ubicacion_id,  d_tiempo_id,  dim_h.d_rango_horario_id
+	JOIN todoOk.BI_Dimension_Tiempo dt ON dt.anio = YEAR(e.fecha_programada) AND dt.mes = MONTH(e.fecha_programada)
+    GROUP BY dim_u_c.d_ubicacion_id, dim_u_a.d_ubicacion_id,  d_tiempo_id,  dim_h.d_rango_horario_id
 END
 GO
 ----
@@ -855,7 +869,7 @@ AS
 		   dt.mes,
 		   (SUM(he.cant_envios_cumplidos) / SUM(he.total_envios)) AS porcentaje
     FROM todoOk.BI_Hechos_Envios he
-    JOIN todoOk.BI_Dimension_Ubicacion du ON he.d_ubicacion_id = du.d_ubicacion_id
+    JOIN todoOk.BI_Dimension_Ubicacion du ON he.d_ubicacion_almacen_id= du.d_ubicacion_id
     JOIN todoOk.BI_Dimension_Tiempo dt ON he.d_tiempo_id = dt.d_tiempo_id
     GROUP BY du.provincia, dt.anio, dt.mes
 GO
@@ -865,7 +879,7 @@ AS
     SELECT TOP 5 du.localidad
     FROM todoOk.BI_Hechos_Envios he
     JOIN todoOk.BI_Dimension_Ubicacion du
-        ON he.d_ubicacion_id = du.d_ubicacion_id
+        ON he.d_ubicacion_cliente_id = du.d_ubicacion_id
     GROUP BY du.localidad
     ORDER BY SUM(he.costo) DESC
 GO
