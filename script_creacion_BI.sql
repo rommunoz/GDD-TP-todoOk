@@ -664,7 +664,7 @@ BEGIN
         SUM(df.subtotal),
         SUM(f.total)
     FROM todoOk.factura f
-        INNER JOIN todoOk.detalle_factura df ON f.factura_numero = df.factura_numero
+        INNER JOIN todoOk.detalle_factura df ON f.factura_numero = df.factura_numero 
         INNER JOIN todoOk.concepto c ON df.concepto_id = c.concepto_id
         INNER JOIN todoOk.vendedor v ON f.usuario_id = v.usuario_id
         INNER JOIN todoOk.domicilio d ON d.usuario_id = v.usuario_id
@@ -714,15 +714,16 @@ BEGIN
     SELECT dsb.d_subrubro_id, 
 		   dm.d_marca_id, 
 		   todoOk.fx_obtener_tiempo_id(fecha_inicio),
-		   dp.d_publicacion_id ,
+		   dp.d_publicacion_id,
 		   DATEDIFF(DAY, fecha_inicio, fecha_fin) dias_vigencia, 
 		   stock
     FROM todoOk.publicacion pu 
-		JOIN producto pr ON (pu.producto_id = pr.producto_id)
+		JOIN todoOk.producto pr ON (pu.producto_id = pr.producto_id)
 		JOIN todoOk.marca m ON (pr.marca_id = m.marca_id)
 		JOIN todoOk.BI_Dimension_Marca dm ON (dm.marca = m.marca)
 		JOIN todoOk.subrubro sb ON (pr.subrubro_id = sb.subrubro_id)
-		JOIN todoOk.BI_Dimension_Subrubro dsb ON(dsb.nombre_subrubro = sb.nombre)
+		JOIN todoOk.rubro r ON (r.rubro_id = sb.rubro_id)
+		JOIN todoOk.BI_Dimension_Subrubro dsb ON(dsb.nombre_subrubro = sb.nombre) AND (r.descripcion = dsb.descripcion_rubro)
 		JOIN todoOk.BI_Dimension_Publicacion dp ON (pu.publicacion_codigo = dp.codigo) AND (pu.descripcion = dp.descripcion)
 END
 GO
@@ -767,7 +768,7 @@ EXEC todoOk.BI_Migrar_Dimension_Tipo_Envio;--3
 EXEC todoOk.BI_Migrar_Hecho_Envio;--53168
 EXEC todoOk.BI_Migrar_Hechos_Factura;--2937
 EXEC todoOk.BI_Migrar_Hechos_Ventas;--13078
-EXEC todoOk.BI_Migrar_Hechos_Publicacion;--700776
+EXEC todoOk.BI_Migrar_Hechos_Publicacion;--34629
 EXEC todoOk.BI_Migrar_Hechos_Pago;--63120
 GO
 ------VIEWS-----------------
