@@ -1,4 +1,4 @@
-
+USE GD2C2024
 ------Drop Constraints-------------------
 -------------foraneas------------------
 IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BI_Hechos_Envios_Ubicacion_Cliente')
