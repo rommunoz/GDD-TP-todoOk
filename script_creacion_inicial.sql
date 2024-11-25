@@ -1,3 +1,4 @@
+USE GD2C2024
 -- ELIMINAR CONSTRAINTS FORANEAS----
 
 
@@ -773,7 +774,7 @@ BEGIN
     JOIN (SELECT MAX(producto_id) AS producto_id, producto_codigo FROM todoOk.producto GROUP BY producto_codigo) p
         ON m.PRODUCTO_CODIGO = p.producto_codigo
     
-    WHERE m.PUBLICACION_DESCRIPCION IS NOT NULL 
+    WHERE m.PUBLICACION_DESCRIPCIONÂ ISÂ NOTÂ NULL 
 END;
 GO
 
