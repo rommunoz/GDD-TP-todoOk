@@ -737,6 +737,7 @@ BEGIN
 		JOIN todoOk.BI_Dimension_Publicacion dp ON (pu.publicacion_codigo = dp.codigo) AND (pu.descripcion = dp.descripcion)
 		JOIN todoOk.BI_Dimension_Tiempo t ON t.anio = YEAR(pu.fecha_inicio)
 											AND t.mes = MONTH(pu.fecha_inicio)
+	GROUP BY dsb.d_subrubro_id,dm.d_marca_id, d_tiempo_id, dp.d_publicacion_id, DATEDIFF(DAY, fecha_inicio, fecha_fin), stock
 END
 GO
 
@@ -779,9 +780,9 @@ EXEC todoOk.BI_Migrar_Dimension_Concepto;--3
 EXEC todoOk.BI_Migrar_Dimension_Publicacion;--34629
 EXEC todoOk.BI_Migrar_Dimension_Tipo_Envio;--3
 
-EXEC todoOk.BI_Migrar_Hecho_Envio;--74952
-EXEC todoOk.BI_Migrar_Hechos_Factura;--2937
-EXEC todoOk.BI_Migrar_Hechos_Ventas;--13077
+EXEC todoOk.BI_Migrar_Hecho_Envio;--340
+EXEC todoOk.BI_Migrar_Hechos_Factura;--4539
+EXEC todoOk.BI_Migrar_Hechos_Ventas;--103973
 EXEC todoOk.BI_Migrar_Hechos_Publicacion;--34629
 EXEC todoOk.BI_Migrar_Hechos_Pago;--82324
 GO
